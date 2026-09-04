@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+import sys
 
 load_dotenv('.env.local')
 load_dotenv()
+
+sys.path.append('.')
+from app.routes.chat import router as chat_router
 
 app = FastAPI(
     title="AI Receptionist API",
@@ -19,17 +23,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(chat_router)
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
-
-@app.post("/api/chat")
-def chat():
-    return {"error": "Not implemented yet"}
-
-@app.post("/api/upload")
-def upload():
-    return {"error": "Not implemented yet"}
 
 if __name__ == "__main__":
     import uvicorn
