@@ -1,16 +1,20 @@
 """
 Layer 4: LLM Generation + Redaction
 - Creates prompt with context from retrieved documents
-- Sends to LLM (Ollama/Groq)
+- Sends to LLM (Groq API)
 - Redacts sensitive information
 - Returns clean response
-(Using mock LLM for testing)
 """
 
 import re
+import os
 from typing import List
+from dotenv import load_dotenv
 from pydantic import BaseModel
 from layer3_retrieval import Document
+
+load_dotenv('.env.local')
+load_dotenv()
 
 class GenerationResult(BaseModel):
     """Result of LLM generation"""
@@ -33,7 +37,7 @@ class LLMGenerator:
     
     def __init__(self):
         print("Initializing LLM Generator...")
-        print("✓ Ready to generate responses")
+        print("✓ Ready to generate responses with Groq")
     
     def generate(self, query: str, documents: List[Document]) -> GenerationResult:
         """
@@ -50,7 +54,7 @@ class LLMGenerator:
             # Build prompt
             prompt = self._build_prompt(query, documents)
             
-            # Call LLM (mock for now)
+            # Call LLM
             response = self._call_llm(prompt)
             
             if not response:
@@ -95,33 +99,34 @@ Be concise and helpful."""
         full_prompt = f"{system}\n\n{context}{user_question}"
         return full_prompt
     
-@staticmethod
-def _call_llm(prompt: str) -> str:
-    """
-    Call Groq LLM with prompt
-    """
-    import os
-    from langchain_groq import ChatGroq
+    @staticmethod
+    def _call_llm(prompt: str) -> str:
+        """Call Groq LLM with prompt"""
+        from langchain_groq import ChatGroq
+        
+        try:
+            api_key = os.getenv('GROQ_API_KEY')
+            if not api_key:
+                return "Error: GROQ_API_KEY not set in environment"
+            
+            # Initialize Groq LLM
+            # NOTE: llama-3.1-8b-instant / llama-3.3-70b-versatile returned 404
+            # model_not_found for this account even though they appear in the
+            # Groq console — client.models.list() confirmed they aren't in this
+            # key's active model set. openai/gpt-oss-20b is currently available.
+            llm = ChatGroq(
+                temperature=0.7,
+                model_name="openai/gpt-oss-20b",
+                api_key=api_key
+            )
+            
+            # Call LLM
+            response = llm.invoke(prompt)
+            return response.content
+        
+        except Exception as e:
+            return f"Error calling Groq: {str(e)}"
     
-    try:
-        api_key = os.getenv('GROQ_API_KEY')
-        if not api_key:
-            return "Error: GROQ_API_KEY not set"
-        
-        # Initialize Groq LLM
-        llm = ChatGroq(
-            temperature=0.7,
-            model_name="mixtral-8x7b-32768",
-            api_key=api_key
-        )
-        
-        # Call LLM
-        response = llm.invoke(prompt)
-        return response.content
-    
-    except Exception as e:
-        return f"Error calling Groq: {str(e)}"
-        
     @staticmethod
     def _redact_sensitive_info(text: str) -> tuple:
         """
@@ -161,25 +166,9 @@ if __name__ == "__main__":
         metadata={"section": "work_arrangements"}
     )
     
-    health_doc = Document(
-        id="doc_3",
-        content="Health Insurance: Company provides comprehensive health insurance coverage including medical, dental, and vision. Contact hr@company.com for details.",
-        source="handbook.md",
-        metadata={"section": "benefits"}
-    )
-    
-    sick_doc = Document(
-        id="doc_4",
-        content="Sick Leave: Employees are entitled to 10 days of paid sick leave per year. Contact hr@company.com to submit.",
-        source="handbook.md",
-        metadata={"section": "time_off"}
-    )
-    
     test_cases = [
         ("What is the vacation policy?", [vacation_doc]),
         ("Can I work from home?", [remote_doc]),
-        ("Tell me about health insurance", [health_doc]),
-        ("What about sick leave?", [sick_doc]),
     ]
     
     print("\n" + "="*80)
@@ -188,7 +177,5 @@ if __name__ == "__main__":
         print(f"\nQuery: '{query}'")
         if result.success:
             print(f"Response: {result.response}")
-            if result.redacted_info:
-                print(f"Redacted: {result.redacted_info}")
         else:
             print(f"Error: {result.error}")
