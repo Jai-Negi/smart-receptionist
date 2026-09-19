@@ -95,29 +95,33 @@ Be concise and helpful."""
         full_prompt = f"{system}\n\n{context}{user_question}"
         return full_prompt
     
-    @staticmethod
-    def _call_llm(prompt: str) -> str:
-        """
-        Call LLM with prompt
-        (Using mock responses for testing - will replace with real Ollama/Groq call)
-        """
-        
-        # Mock responses based on prompt content
-        if "vacation" in prompt.lower():
-            return "Based on our Vacation Policy, all employees receive 20 days of paid vacation per year. You accrue 1.67 days each month. You need to request time off at least 2 weeks in advance."
-        
-        elif "remote" in prompt.lower() or "work from home" in prompt.lower():
-            return "Our Remote Work Policy allows full-time employees to work remotely up to 2 days per week. You'll need to get approval from your manager first. All company policies still apply when working remotely."
-        
-        elif "health" in prompt.lower() or "insurance" in prompt.lower():
-            return "We offer comprehensive health insurance that covers medical, dental, and vision. The company covers 80% of the premium costs, and you contribute 20%. Coverage starts on your first day."
-        
-        elif "sick" in prompt.lower():
-            return "Employees get 10 days of paid sick leave per year. You can use it for your own illness or to care for immediate family members."
-        
-        else:
-            return "I found the following information in our company documents that might help answer your question. Please let me know if you need more details."
+@staticmethod
+def _call_llm(prompt: str) -> str:
+    """
+    Call Groq LLM with prompt
+    """
+    import os
+    from langchain_groq import ChatGroq
     
+    try:
+        api_key = os.getenv('GROQ_API_KEY')
+        if not api_key:
+            return "Error: GROQ_API_KEY not set"
+        
+        # Initialize Groq LLM
+        llm = ChatGroq(
+            temperature=0.7,
+            model_name="mixtral-8x7b-32768",
+            api_key=api_key
+        )
+        
+        # Call LLM
+        response = llm.invoke(prompt)
+        return response.content
+    
+    except Exception as e:
+        return f"Error calling Groq: {str(e)}"
+        
     @staticmethod
     def _redact_sensitive_info(text: str) -> tuple:
         """
