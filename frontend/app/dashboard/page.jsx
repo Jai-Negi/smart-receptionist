@@ -1,20 +1,34 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Dashboard() {
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
+    const unsubscribe = auth.onAuthStateChanged(async (authUser) => {
+      if (authUser) {
+        setUser(authUser);
+        
+        // Fetch user profile from Firestore
+        try {
+          const userDocRef = doc(db, 'users', authUser.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          
+          if (userDocSnap.exists()) {
+            setUserData(userDocSnap.data());
+          }
+        } catch (err) {
+          console.error('Error fetching user data:', err);
+        }
       } else {
         router.push('/auth/login');
       }
@@ -42,7 +56,7 @@ export default function Dashboard() {
 
       <main className="dashboard-content">
         <div className="welcome-section">
-          <h2>Welcome, {user?.email}</h2>
+          <h2>Welcome, {userData?.firstName || 'User'}</h2>
           <p>Create your first project to get started</p>
         </div>
 

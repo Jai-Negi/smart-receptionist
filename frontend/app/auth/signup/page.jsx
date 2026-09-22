@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { doc, setDoc } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Signup() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -18,6 +21,11 @@ export default function Signup() {
     e.preventDefault();
     setError('');
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError('First and last name are required');
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -26,7 +34,19 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save user profile to Firestore
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        createdAt: new Date(),
+      });
+
       router.push('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -40,6 +60,22 @@ export default function Signup() {
       <div className="auth-container">
         <h1>Sign Up</h1>
         <form onSubmit={handleSignup}>
+          <div className="name-row">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+            />
+          </div>
           <input
             type="email"
             placeholder="Email"
@@ -98,6 +134,12 @@ export default function Signup() {
           display: flex;
           flex-direction: column;
           gap: 16px;
+        }
+
+        .name-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
         }
 
         input {
