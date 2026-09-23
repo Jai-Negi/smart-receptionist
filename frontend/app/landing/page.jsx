@@ -221,7 +221,6 @@ export default function Landing() {
 
       <style jsx>{`
         .landing {
-          background: var(--color-neutral-50);
           overflow: hidden;
         }
 
@@ -296,6 +295,7 @@ export default function Landing() {
           margin: 0 auto;
           padding: var(--spacing-12);
           min-height: 90vh;
+          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         }
 
         .hero-badge {
@@ -393,13 +393,13 @@ export default function Landing() {
 
         .how-it-works {
           padding: var(--spacing-12) var(--spacing-4);
-          background: white;
+          background: #f8fafc;
           border-top: 1px solid var(--color-neutral-200);
         }
 
         .features {
           padding: var(--spacing-12) var(--spacing-4);
-          background: var(--color-neutral-50);
+          background: #ecf3fe;
           border-top: 1px solid var(--color-neutral-200);
         }
 
@@ -465,7 +465,7 @@ export default function Landing() {
           justify-content: center;
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(45, 212, 191, 0.1) 100%);
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%);
           color: var(--color-primary-600);
           border-radius: var(--radius-lg);
           margin: 0 auto var(--spacing-4);
@@ -473,7 +473,7 @@ export default function Landing() {
         }
 
         .step-card:hover .step-icon-wrapper {
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(45, 212, 191, 0.2) 100%);
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(45, 212, 191, 0.25) 100%);
           transform: scale(1.05);
         }
 
@@ -505,7 +505,7 @@ export default function Landing() {
           justify-content: center;
           width: 64px;
           height: 64px;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(45, 212, 191, 0.1) 100%);
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%);
           color: var(--color-primary-600);
           border-radius: var(--radius-md);
           margin-bottom: var(--spacing-4);
@@ -513,7 +513,7 @@ export default function Landing() {
         }
 
         .feature-card:hover .feature-icon-wrapper {
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(45, 212, 191, 0.2) 100%);
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(45, 212, 191, 0.25) 100%);
           transform: scale(1.1);
         }
 
@@ -552,10 +552,12 @@ export default function Landing() {
         .btn-primary-white {
           background: white;
           color: var(--color-primary-600);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .btn-primary-white:hover {
           background: var(--color-neutral-100);
+          transform: translateY(-2px);
         }
 
         .btn-secondary {
