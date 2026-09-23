@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 
 // SVG Icons
 const Icons = {
@@ -74,11 +73,11 @@ export default function Landing() {
             <span className="logo-text">SmartReceptionist</span>
           </div>
           <div className="nav-links">
-            <Link href="/auth/login" className="nav-link">
+            <Link href="/auth/login" className="nav-btn nav-btn-secondary">
               Login
             </Link>
-            <Link href="/auth/signup" className="nav-cta">
-              Get Started
+            <Link href="/auth/signup" className="nav-btn nav-btn-primary">
+              Sign Up
             </Link>
           </div>
         </div>
@@ -101,11 +100,8 @@ export default function Landing() {
 
           <div className="hero-ctas">
             <Link href="/auth/signup" className="btn btn-primary btn-lg">
-              Start Free Trial
+              Get Started
               <span className="btn-arrow">→</span>
-            </Link>
-            <Link href="#how-it-works" className="btn btn-secondary btn-lg">
-              See How It Works
             </Link>
           </div>
         </div>
@@ -126,7 +122,7 @@ export default function Landing() {
       </section>
 
       {/* How It Works */}
-      <section className="how-it-works" id="how-it-works">
+      <section className="how-it-works">
         <div className="section-container">
           <h2 className="section-title">How It Works</h2>
           <p className="section-subtitle">Three simple steps to your AI receptionist</p>
@@ -203,9 +199,8 @@ export default function Landing() {
       <section className="cta-final">
         <div className="section-container">
           <h2>Ready to Transform Your Support?</h2>
-          <p>Join thousands of companies automating their customer support with AI</p>
           <Link href="/auth/signup" className="btn btn-primary-white btn-lg">
-            Start Your Free Trial
+            Get Started
           </Link>
         </div>
       </section>
@@ -231,7 +226,7 @@ export default function Landing() {
           z-index: 30;
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(10px);
-          border-bottom: 1px solid var(--color-neutral-200);
+          border-bottom: 1px solid #3a3a3f;
           padding: var(--spacing-4);
         }
 
@@ -258,31 +253,41 @@ export default function Landing() {
 
         .nav-links {
           display: flex;
-          gap: var(--spacing-4);
+          gap: var(--spacing-3);
           align-items: center;
         }
 
-        .nav-link {
-          color: var(--color-neutral-900);
-          font-weight: 500;
-          transition: color 0.2s;
-        }
-
-        .nav-link:hover {
-          color: var(--color-primary-500);
-        }
-
-        .nav-cta {
-          padding: 8px 16px;
-          background: var(--color-primary-500);
-          color: white;
+        .nav-btn {
+          padding: 10px 20px;
           border-radius: var(--radius-md);
-          font-weight: 500;
-          transition: background 0.2s;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: all 0.2s;
+          text-decoration: none;
+          display: inline-block;
         }
 
-        .nav-cta:hover {
-          background: var(--color-primary-600);
+        .nav-btn-primary {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .nav-btn-primary:hover {
+          box-shadow: 0 6px 16px rgba(2, 132, 199, 0.4);
+          transform: translateY(-1px);
+        }
+
+        .nav-btn-secondary {
+          background: transparent;
+          color: var(--color-neutral-900);
+          border: 2px solid var(--color-neutral-300);
+        }
+
+        .nav-btn-secondary:hover {
+          background: var(--color-neutral-100);
+          border-color: var(--color-primary-500);
+          color: var(--color-primary-600);
         }
 
         /* Hero Section */
@@ -412,14 +417,8 @@ export default function Landing() {
 
         .cta-final h2 {
           font-size: 2.5rem;
-          margin-bottom: var(--spacing-4);
-          color: white;
-        }
-
-        .cta-final p {
-          font-size: 1.125rem;
           margin-bottom: var(--spacing-8);
-          opacity: 0.95;
+          color: white;
         }
 
         .section-title {
@@ -575,17 +574,6 @@ export default function Landing() {
           box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
-        .btn-secondary {
-          background: transparent;
-          color: #64d3ff;
-          border: 2px solid #0ea5e9;
-        }
-
-        .btn-secondary:hover {
-          background: rgba(14, 165, 233, 0.1);
-          border-color: #64d3ff;
-        }
-
         .btn-lg {
           padding: 16px 32px;
           font-size: 1.125rem;
@@ -625,8 +613,10 @@ export default function Landing() {
             font-size: 2rem;
           }
 
-          .hero-ctas {
+          .nav-links {
             flex-direction: column;
+            width: 100%;
+            gap: var(--spacing-2);
           }
 
           .steps-grid,
