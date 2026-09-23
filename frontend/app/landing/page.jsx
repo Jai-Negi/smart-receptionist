@@ -295,15 +295,15 @@ export default function Landing() {
           margin: 0 auto;
           padding: var(--spacing-12);
           min-height: 90vh;
-          background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+          background: #1a1a1e;
         }
 
         .hero-badge {
           display: inline-block;
           padding: 8px 16px;
-          background: rgba(14, 165, 233, 0.1);
-          color: var(--color-primary-600);
-          border: 1px solid var(--color-primary-200);
+          background: rgba(14, 165, 233, 0.15);
+          color: #64d3ff;
+          border: 1px solid rgba(14, 165, 233, 0.3);
           border-radius: var(--radius-full);
           font-size: 0.875rem;
           font-weight: 500;
@@ -314,12 +314,12 @@ export default function Landing() {
           font-size: 3.75rem;
           line-height: 1.1;
           margin-bottom: var(--spacing-6);
-          color: var(--color-neutral-900);
+          color: #ffffff;
         }
 
         .hero-subtitle {
           font-size: 1.25rem;
-          color: var(--color-neutral-600);
+          color: #b0b0b8;
           margin-bottom: var(--spacing-8);
           line-height: 1.6;
         }
@@ -341,7 +341,7 @@ export default function Landing() {
           background: white;
           border-radius: var(--radius-lg);
           padding: var(--spacing-6);
-          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
           width: 100%;
           max-width: 400px;
         }
@@ -393,14 +393,14 @@ export default function Landing() {
 
         .how-it-works {
           padding: var(--spacing-12) var(--spacing-4);
-          background: #f8fafc;
-          border-top: 1px solid var(--color-neutral-200);
+          background: #2a2a2f;
+          border-top: 1px solid #3a3a3f;
         }
 
         .features {
           padding: var(--spacing-12) var(--spacing-4);
-          background: #ecf3fe;
-          border-top: 1px solid var(--color-neutral-200);
+          background: #252529;
+          border-top: 1px solid #3a3a3f;
         }
 
         .cta-final {
@@ -426,12 +426,12 @@ export default function Landing() {
           text-align: center;
           margin-bottom: var(--spacing-4);
           font-size: 2.5rem;
-          color: var(--color-neutral-900);
+          color: #ffffff;
         }
 
         .section-subtitle {
           text-align: center;
-          color: var(--color-neutral-600);
+          color: #b0b0b8;
           font-size: 1.125rem;
           margin-bottom: var(--spacing-12);
         }
@@ -444,19 +444,28 @@ export default function Landing() {
         }
 
         .step-card {
-          background: white;
+          background: #353539;
           padding: var(--spacing-8);
           border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-sm);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
           text-align: center;
-          border: 1px solid var(--color-neutral-200);
+          border: 1px solid #4a4a50;
           transition: all 0.3s;
         }
 
         .step-card:hover {
           transform: translateY(-4px);
-          box-shadow: var(--shadow-md);
-          border-color: var(--color-primary-300);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+          border-color: #0ea5e9;
+          background: #3a3a3f;
+        }
+
+        .step-card h3 {
+          color: #ffffff;
+        }
+
+        .step-card p {
+          color: #b0b0b8;
         }
 
         .step-icon-wrapper {
@@ -465,15 +474,15 @@ export default function Landing() {
           justify-content: center;
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%);
-          color: var(--color-primary-600);
+          background: rgba(14, 165, 233, 0.1);
+          color: #64d3ff;
           border-radius: var(--radius-lg);
           margin: 0 auto var(--spacing-4);
           transition: all 0.3s;
         }
 
         .step-card:hover .step-icon-wrapper {
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(45, 212, 191, 0.25) 100%);
+          background: rgba(14, 165, 233, 0.2);
           transform: scale(1.05);
         }
 
@@ -487,16 +496,17 @@ export default function Landing() {
         .feature-card {
           padding: var(--spacing-8);
           border-radius: var(--radius-lg);
-          background: white;
-          box-shadow: var(--shadow-sm);
-          border: 1px solid var(--color-neutral-200);
+          background: #353539;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+          border: 1px solid #4a4a50;
           transition: all 0.3s;
         }
 
         .feature-card:hover {
-          box-shadow: var(--shadow-base);
-          border-color: var(--color-primary-300);
+          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+          border-color: #0ea5e9;
           transform: translateY(-2px);
+          background: #3a3a3f;
         }
 
         .feature-icon-wrapper {
@@ -505,21 +515,25 @@ export default function Landing() {
           justify-content: center;
           width: 64px;
           height: 64px;
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(45, 212, 191, 0.15) 100%);
-          color: var(--color-primary-600);
+          background: rgba(14, 165, 233, 0.1);
+          color: #64d3ff;
           border-radius: var(--radius-md);
           margin-bottom: var(--spacing-4);
           transition: all 0.3s;
         }
 
         .feature-card:hover .feature-icon-wrapper {
-          background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(45, 212, 191, 0.25) 100%);
+          background: rgba(14, 165, 233, 0.2);
           transform: scale(1.1);
         }
 
         .feature-card h3 {
           margin-bottom: var(--spacing-2);
-          color: var(--color-neutral-900);
+          color: #ffffff;
+        }
+
+        .feature-card p {
+          color: #b0b0b8;
         }
 
         /* Buttons */
@@ -541,34 +555,35 @@ export default function Landing() {
         .btn-primary {
           background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
           color: white;
-          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
         }
 
         .btn-primary:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(2, 132, 199, 0.4);
+          box-shadow: 0 12px 24px rgba(2, 132, 199, 0.5);
         }
 
         .btn-primary-white {
           background: white;
           color: var(--color-primary-600);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn-primary-white:hover {
           background: var(--color-neutral-100);
           transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
         }
 
         .btn-secondary {
           background: transparent;
-          color: var(--color-primary-600);
-          border: 2px solid var(--color-primary-300);
+          color: #64d3ff;
+          border: 2px solid #0ea5e9;
         }
 
         .btn-secondary:hover {
-          background: var(--color-primary-50);
-          border-color: var(--color-primary-500);
+          background: rgba(14, 165, 233, 0.1);
+          border-color: #64d3ff;
         }
 
         .btn-lg {
@@ -586,15 +601,15 @@ export default function Landing() {
 
         /* Footer */
         .footer {
-          background: var(--color-neutral-900);
+          background: #1a1a1e;
           color: white;
           padding: var(--spacing-8) var(--spacing-4);
-          border-top: 1px solid var(--color-neutral-800);
+          border-top: 1px solid #3a3a3f;
         }
 
         .footer-center {
           text-align: center;
-          color: var(--color-neutral-400);
+          color: #7a7a82;
         }
 
         /* Responsive */
