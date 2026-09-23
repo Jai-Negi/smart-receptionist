@@ -1,27 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Colors */
-  --color-white: #ffffff;
-  --color-gray-50: #f5f5f7;
-  --color-gray-100: #efeff1;
-  --color-gray-200: #e5e5e7;
-  --color-gray-300: #d2d2d7;
-  --color-gray-400: #a1a1a6;
-  --color-gray-500: #86868b;
-  --color-gray-600: #6f6f77;
-  --color-gray-700: #51515a;
-  --color-gray-800: #424245;
-  --color-black: #1d1d1f;
-  
-  --color-blue: #0071e3;
-  --color-blue-light: #0077ed;
-  --color-blue-dark: #0056b3;
-  
-  --color-success: #34c759;
-  --color-warning: #ff9500;
-  --color-error: #ff3b30;
-  --color-info: #30b0c0;
+  /* Primary Brand Colors */
+  --color-primary-50: #f0f9ff;
+  --color-primary-100: #e0f2fe;
+  --color-primary-200: #bae6fd;
+  --color-primary-300: #7dd3fc;
+  --color-primary-400: #38bdf8;
+  --color-primary-500: #0ea5e9;
+  --color-primary-600: #0284c7;
+  --color-primary-700: #0369a1;
+
+  /* Secondary Brand Colors */
+  --color-secondary-400: #2dd4bf;
+  --color-secondary-500: #14b8a6;
+  --color-secondary-600: #0d9488;
+
+  /* Neutral Colors */
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  --gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #2dd4bf 100%);
+  --gradient-mesh: linear-gradient(135deg, #0ea5e9 0%, #2dd4bf 50%, #8b5cf6 100%);
 
   /* Typography */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -39,11 +55,14 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.16);
 
   /* Border radius */
   --radius-sm: 6px;
   --radius-base: 8px;
   --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
 }
 
 * {
@@ -60,12 +79,12 @@ html {
 
 body {
   font-family: var(--font-family);
-  background-color: var(--color-gray-50);
-  color: var(--color-black);
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
   line-height: 1.5;
 }
 
-/* Typography */
+/* Typography Hierarchy */
 h1 {
   font-size: 3rem;
   font-weight: 700;
@@ -92,6 +111,11 @@ h4 {
   line-height: 1.4;
 }
 
+h5 {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
 p {
   font-size: 1rem;
   line-height: 1.6;
@@ -99,39 +123,51 @@ p {
 
 small {
   font-size: 0.875rem;
-  color: var(--color-gray-500);
+  color: var(--color-neutral-500);
+}
+
+/* Links */
+a {
+  color: var(--color-primary-500);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--color-primary-600);
 }
 
 /* Accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-blue);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
 button:focus-visible,
 input:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--color-blue);
+  outline: 2px solid var(--color-primary-500);
   outline-offset: 2px;
 }
 
-/* Skip to main content link */
+/* Skip Link */
 .skip-link {
   position: absolute;
   top: -40px;
   left: 0;
-  background: var(--color-blue);
+  background: var(--color-primary-500);
   color: white;
   padding: 8px 16px;
   text-decoration: none;
   z-index: 100;
+  border-radius: var(--radius-base);
 }
 
 .skip-link:focus {
   top: 0;
 }
 
-/* Reduced motion */
+/* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -143,31 +179,32 @@ a:focus-visible {
   }
 }
 
-/* Links */
-a {
-  color: var(--color-blue);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-a:hover {
-  color: var(--color-blue-light);
-}
-
-/* Buttons base styles */
+/* Button Base Styles */
 button {
   font-family: var(--font-family);
   cursor: pointer;
   border: none;
   transition: all 0.2s;
+  border-radius: var(--radius-md);
+  font-weight: 600;
 }
 
-/* Forms */
+/* Input Base Styles */
 input,
 textarea,
 select {
   font-family: var(--font-family);
   font-size: 1rem;
+  border-radius: var(--radius-base);
+}
+
+/* Form Focus States */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 /* Responsive */

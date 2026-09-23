@@ -42,14 +42,13 @@ export default function Landing() {
           <div className="hero-badge">✨ AI-Powered Support</div>
           
           <h1 className="hero-title">
-            Your Company's AI<br />
-            <span className="gradient-text">Receptionist</span><br />
-            in 3 Clicks
+            Every question answered.<br />
+            Every customer happy.
           </h1>
 
           <p className="hero-subtitle">
-            Upload a PDF. Get a chatbot. Share a link.<br />
-            No coding required. No setup fees.
+            Upload a PDF. Get an AI receptionist. Share a link.<br />
+            No coding. No setup. Just results.
           </p>
 
           <div className="hero-ctas">
@@ -65,15 +64,15 @@ export default function Landing() {
           <div className="hero-stats">
             <div className="stat">
               <div className="stat-value">1000+</div>
-              <div className="stat-label">Companies Trust Us</div>
+              <div className="stat-label">Companies</div>
             </div>
             <div className="stat">
               <div className="stat-value">99.9%</div>
-              <div className="stat-label">Uptime Guarantee</div>
+              <div className="stat-label">Uptime</div>
             </div>
             <div className="stat">
               <div className="stat-value">24/7</div>
-              <div className="stat-label">Support Ready</div>
+              <div className="stat-label">Support</div>
             </div>
           </div>
         </div>
@@ -107,16 +106,12 @@ export default function Landing() {
               <div className="step-icon">📄</div>
             </div>
 
-            <div className="step-connector"></div>
-
             <div className="step-card">
               <div className="step-number">2</div>
               <h3>AI Learns</h3>
               <p>Our AI analyzes your document and learns how to answer questions accurately</p>
               <div className="step-icon">🧠</div>
             </div>
-
-            <div className="step-connector"></div>
 
             <div className="step-card">
               <div className="step-number">3</div>
@@ -144,7 +139,7 @@ export default function Landing() {
             <div className="feature-card">
               <div className="feature-icon">⚡</div>
               <h3>Lightning Fast</h3>
-              <p>Responses in milliseconds. 99.9% uptime guarantee across all deployments</p>
+              <p>Responses in milliseconds. 99.9% uptime guarantee</p>
             </div>
 
             <div className="feature-card">
@@ -156,7 +151,7 @@ export default function Landing() {
             <div className="feature-card">
               <div className="feature-icon">📊</div>
               <h3>Deep Analytics</h3>
-              <p>Track conversations, identify gaps, and improve your documentation</p>
+              <p>Track conversations, identify gaps, and improve documentation</p>
             </div>
 
             <div className="feature-card">
@@ -167,59 +162,8 @@ export default function Landing() {
 
             <div className="feature-card">
               <div className="feature-icon">💰</div>
-              <h3>No Setup Fees</h3>
-              <p>Free to start. Pay only for what you use. Cancel anytime</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Preview */}
-      <section className="pricing-preview">
-        <div className="section-container">
-          <h2 className="section-title">Simple Pricing</h2>
-          <p className="section-subtitle">Start free. Upgrade when you need more</p>
-
-          <div className="pricing-cards">
-            <div className="pricing-card">
-              <h3>Starter</h3>
-              <div className="price">Free</div>
-              <ul className="features-list">
-                <li>✓ 1 Project</li>
-                <li>✓ 100 messages/month</li>
-                <li>✓ Basic analytics</li>
-              </ul>
-              <button className="btn btn-secondary" disabled>
-                Get Started
-              </button>
-            </div>
-
-            <div className="pricing-card featured">
-              <div className="badge">Most Popular</div>
-              <h3>Pro</h3>
-              <div className="price"><span className="currency">$</span>29<span className="period">/mo</span></div>
-              <ul className="features-list">
-                <li>✓ Unlimited Projects</li>
-                <li>✓ 10,000 messages/month</li>
-                <li>✓ Advanced analytics</li>
-                <li>✓ Priority support</li>
-              </ul>
-              <Link href="/auth/signup" className="btn btn-primary">
-                Start Free Trial
-              </Link>
-            </div>
-
-            <div className="pricing-card">
-              <h3>Enterprise</h3>
-              <div className="price">Custom</div>
-              <ul className="features-list">
-                <li>✓ Unlimited everything</li>
-                <li>✓ Custom integrations</li>
-                <li>✓ Dedicated support</li>
-              </ul>
-              <button className="btn btn-secondary">
-                Contact Sales
-              </button>
+              <h3>Transparent Pricing</h3>
+              <p>Start free. Pay only for what you use. Cancel anytime</p>
             </div>
           </div>
         </div>
@@ -230,8 +174,8 @@ export default function Landing() {
         <div className="section-container">
           <h2>Ready to Transform Your Support?</h2>
           <p>Join thousands of companies automating their customer support with AI</p>
-          <Link href="/auth/signup" className="btn btn-primary btn-lg">
-            Start Your Free Trial Today
+          <Link href="/auth/signup" className="btn btn-primary-white btn-lg">
+            Start Your Free Trial
           </Link>
         </div>
       </section>
@@ -244,19 +188,16 @@ export default function Landing() {
               <h4>Product</h4>
               <Link href="#how-it-works">How It Works</Link>
               <Link href="#features">Features</Link>
-              <Link href="#pricing">Pricing</Link>
             </div>
             <div className="footer-section">
               <h4>Company</h4>
               <Link href="#">About</Link>
               <Link href="#">Blog</Link>
-              <Link href="#">Careers</Link>
             </div>
             <div className="footer-section">
               <h4>Legal</h4>
               <Link href="#">Privacy</Link>
               <Link href="#">Terms</Link>
-              <Link href="#">Security</Link>
             </div>
           </div>
           <div className="footer-bottom">
@@ -267,7 +208,7 @@ export default function Landing() {
 
       <style jsx>{`
         .landing {
-          background: var(--color-white);
+          background: var(--color-neutral-50);
           overflow: hidden;
         }
 
@@ -278,7 +219,7 @@ export default function Landing() {
           z-index: 30;
           background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(10px);
-          border-bottom: 1px solid var(--color-gray-200);
+          border-bottom: 1px solid var(--color-neutral-200);
           padding: var(--spacing-4);
         }
 
@@ -296,7 +237,7 @@ export default function Landing() {
           gap: var(--spacing-2);
           font-weight: 600;
           font-size: 1.125rem;
-          color: var(--color-black);
+          color: var(--color-neutral-900);
         }
 
         .logo-icon {
@@ -310,18 +251,18 @@ export default function Landing() {
         }
 
         .nav-link {
-          color: var(--color-black);
+          color: var(--color-neutral-900);
           font-weight: 500;
           transition: color 0.2s;
         }
 
         .nav-link:hover {
-          color: var(--color-blue);
+          color: var(--color-primary-500);
         }
 
         .nav-cta {
           padding: 8px 16px;
-          background: var(--color-blue);
+          background: var(--color-primary-500);
           color: white;
           border-radius: var(--radius-md);
           font-weight: 500;
@@ -329,7 +270,7 @@ export default function Landing() {
         }
 
         .nav-cta:hover {
-          background: var(--color-blue-light);
+          background: var(--color-primary-600);
         }
 
         /* Hero Section */
@@ -346,9 +287,10 @@ export default function Landing() {
 
         .hero-badge {
           display: inline-block;
-          padding: 6px 12px;
-          background: rgba(0, 113, 227, 0.1);
-          color: var(--color-blue);
+          padding: 8px 16px;
+          background: rgba(14, 165, 233, 0.1);
+          color: var(--color-primary-600);
+          border: 1px solid rgba(14, 165, 233, 0.2);
           border-radius: var(--radius-full);
           font-size: 0.875rem;
           font-weight: 500;
@@ -359,19 +301,12 @@ export default function Landing() {
           font-size: 3.75rem;
           line-height: 1.1;
           margin-bottom: var(--spacing-6);
-          color: var(--color-black);
-        }
-
-        .gradient-text {
-          background: linear-gradient(135deg, #0071e3 0%, #30b0c0 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: var(--color-neutral-900);
         }
 
         .hero-subtitle {
           font-size: 1.25rem;
-          color: var(--color-gray-600);
+          color: var(--color-neutral-600);
           margin-bottom: var(--spacing-8);
           line-height: 1.6;
         }
@@ -388,18 +323,21 @@ export default function Landing() {
           grid-template-columns: repeat(3, 1fr);
           gap: var(--spacing-6);
           padding-top: var(--spacing-6);
-          border-top: 1px solid var(--color-gray-200);
+          border-top: 1px solid var(--color-neutral-200);
         }
 
         .stat-value {
           font-size: 1.5rem;
           font-weight: 700;
-          color: var(--color-black);
+          background: var(--gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .stat-label {
           font-size: 0.875rem;
-          color: var(--color-gray-500);
+          color: var(--color-neutral-500);
           margin-top: var(--spacing-2);
         }
 
@@ -411,7 +349,7 @@ export default function Landing() {
         }
 
         .hero-card {
-          background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+          background: white;
           border-radius: var(--radius-lg);
           padding: var(--spacing-6);
           box-shadow: var(--shadow-md);
@@ -432,20 +370,18 @@ export default function Landing() {
 
         .chat-bubble.assistant {
           padding: var(--spacing-3) var(--spacing-4);
-          background: var(--color-gray-100);
+          background: var(--color-neutral-100);
           border-radius: var(--radius-md);
-          color: var(--color-black);
-          max-width: 85%;
+          color: var(--color-neutral-900);
         }
 
         .chat-bubble.user {
           padding: var(--spacing-3) var(--spacing-4);
-          background: var(--color-blue);
+          background: var(--color-primary-500);
           color: white;
           border-radius: var(--radius-md);
-          max-width: 85%;
           margin-left: auto;
-          text-align: right;
+          max-width: 85%;
         }
 
         @keyframes slideIn {
@@ -468,21 +404,17 @@ export default function Landing() {
 
         .how-it-works {
           padding: var(--spacing-12) var(--spacing-4);
-          background: var(--color-gray-50);
+          background: white;
         }
 
         .features {
           padding: var(--spacing-12) var(--spacing-4);
-        }
-
-        .pricing-preview {
-          padding: var(--spacing-12) var(--spacing-4);
-          background: var(--color-gray-50);
+          background: linear-gradient(180deg, var(--color-primary-50) 0%, white 100%);
         }
 
         .cta-final {
           padding: var(--spacing-12) var(--spacing-4);
-          background: linear-gradient(135deg, var(--color-blue) 0%, #0056b3 100%);
+          background: var(--gradient-accent);
           color: white;
           text-align: center;
         }
@@ -490,6 +422,7 @@ export default function Landing() {
         .cta-final h2 {
           font-size: 2.5rem;
           margin-bottom: var(--spacing-4);
+          color: white;
         }
 
         .cta-final p {
@@ -502,11 +435,15 @@ export default function Landing() {
           text-align: center;
           margin-bottom: var(--spacing-4);
           font-size: 2.5rem;
+          background: var(--gradient-primary);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .section-subtitle {
           text-align: center;
-          color: var(--color-gray-500);
+          color: var(--color-neutral-500);
           font-size: 1.125rem;
           margin-bottom: var(--spacing-12);
         }
@@ -516,8 +453,6 @@ export default function Landing() {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: var(--spacing-6);
-          align-items: start;
-          position: relative;
         }
 
         .step-card {
@@ -526,12 +461,14 @@ export default function Landing() {
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-sm);
           text-align: center;
-          transition: transform 0.3s, box-shadow 0.3s;
+          border: 1px solid var(--color-neutral-200);
+          transition: all 0.3s;
         }
 
         .step-card:hover {
           transform: translateY(-4px);
-          box-shadow: var(--shadow-base);
+          box-shadow: var(--shadow-md);
+          border-color: var(--color-primary-200);
         }
 
         .step-number {
@@ -540,7 +477,7 @@ export default function Landing() {
           justify-content: center;
           width: 48px;
           height: 48px;
-          background: var(--color-blue);
+          background: var(--gradient-primary);
           color: white;
           border-radius: 50%;
           font-size: 1.5rem;
@@ -551,22 +488,6 @@ export default function Landing() {
         .step-icon {
           font-size: 3rem;
           margin-top: var(--spacing-4);
-        }
-
-        .step-connector {
-          position: absolute;
-          top: 60px;
-          height: 2px;
-          background: var(--color-gray-200);
-          width: calc(33.333% - 40px);
-        }
-
-        .step-connector:first-of-type {
-          left: calc(33.333% + 20px);
-        }
-
-        .step-connector:last-of-type {
-          left: calc(66.666% + 20px);
         }
 
         /* Features Grid */
@@ -581,11 +502,14 @@ export default function Landing() {
           border-radius: var(--radius-lg);
           background: white;
           box-shadow: var(--shadow-sm);
-          transition: box-shadow 0.3s;
+          border: 1px solid var(--color-neutral-200);
+          transition: all 0.3s;
         }
 
         .feature-card:hover {
           box-shadow: var(--shadow-base);
+          border-color: var(--color-primary-200);
+          transform: translateY(-2px);
         }
 
         .feature-icon {
@@ -595,77 +519,7 @@ export default function Landing() {
 
         .feature-card h3 {
           margin-bottom: var(--spacing-2);
-        }
-
-        /* Pricing Cards */
-        .pricing-cards {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--spacing-6);
-          margin-top: var(--spacing-8);
-        }
-
-        .pricing-card {
-          background: white;
-          padding: var(--spacing-8);
-          border-radius: var(--radius-lg);
-          box-shadow: var(--shadow-sm);
-          border: 1px solid var(--color-gray-200);
-          position: relative;
-          transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .pricing-card:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--shadow-base);
-        }
-
-        .pricing-card.featured {
-          border-color: var(--color-blue);
-          box-shadow: 0 0 0 2px rgba(0, 113, 227, 0.1);
-          transform: scale(1.05);
-        }
-
-        .badge {
-          position: absolute;
-          top: -12px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: var(--color-blue);
-          color: white;
-          padding: 4px 12px;
-          border-radius: var(--radius-full);
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .price {
-          font-size: 2.5rem;
-          font-weight: 700;
-          margin: var(--spacing-4) 0;
-          color: var(--color-black);
-        }
-
-        .currency {
-          font-size: 1.5rem;
-          vertical-align: super;
-        }
-
-        .period {
-          font-size: 1rem;
-          color: var(--color-gray-500);
-          font-weight: 400;
-        }
-
-        .features-list {
-          list-style: none;
-          margin: var(--spacing-6) 0;
-        }
-
-        .features-list li {
-          padding: var(--spacing-3) 0;
-          color: var(--color-gray-700);
-          font-size: 0.95rem;
+          color: var(--color-neutral-900);
         }
 
         /* Buttons */
@@ -680,25 +534,38 @@ export default function Landing() {
           transition: all 0.2s;
           text-decoration: none;
           white-space: nowrap;
+          border: none;
+          cursor: pointer;
         }
 
         .btn-primary {
-          background: var(--color-blue);
+          background: var(--gradient-primary);
           color: white;
         }
 
-        .btn-primary:hover:not(:disabled) {
-          background: var(--color-blue-light);
+        .btn-primary:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+        }
+
+        .btn-primary-white {
+          background: white;
+          color: var(--color-primary-600);
+        }
+
+        .btn-primary-white:hover {
+          background: var(--color-neutral-100);
         }
 
         .btn-secondary {
           background: transparent;
-          color: var(--color-blue);
-          border: 2px solid var(--color-blue);
+          color: var(--color-primary-500);
+          border: 2px solid var(--color-primary-500);
         }
 
-        .btn-secondary:hover:not(:disabled) {
-          background: rgba(0, 113, 227, 0.05);
+        .btn-secondary:hover {
+          background: rgba(14, 165, 233, 0.05);
+          border-color: var(--color-primary-600);
         }
 
         .btn-lg {
@@ -714,14 +581,9 @@ export default function Landing() {
           transform: translateX(4px);
         }
 
-        .btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
         /* Footer */
         .footer {
-          background: var(--color-black);
+          background: var(--color-neutral-900);
           color: white;
           padding: var(--spacing-12) var(--spacing-4);
         }
@@ -740,20 +602,20 @@ export default function Landing() {
 
         .footer-section a {
           display: block;
-          color: var(--color-gray-400);
+          color: var(--color-neutral-400);
           margin-bottom: var(--spacing-3);
           transition: color 0.2s;
         }
 
         .footer-section a:hover {
-          color: white;
+          color: var(--color-primary-400);
         }
 
         .footer-bottom {
           text-align: center;
           padding-top: var(--spacing-6);
-          border-top: 1px solid var(--color-gray-700);
-          color: var(--color-gray-500);
+          border-top: 1px solid var(--color-neutral-700);
+          color: var(--color-neutral-400);
         }
 
         /* Responsive */
@@ -773,30 +635,13 @@ export default function Landing() {
             flex-direction: column;
           }
 
-          .steps-grid {
-            grid-template-columns: 1fr;
-            gap: var(--spacing-4);
-          }
-
-          .step-connector {
-            display: none;
-          }
-
+          .steps-grid,
           .features-grid {
             grid-template-columns: 1fr;
           }
 
-          .pricing-cards {
-            grid-template-columns: 1fr;
-          }
-
-          .pricing-card.featured {
-            transform: scale(1);
-          }
-
           .footer-content {
             grid-template-columns: 1fr;
-            gap: var(--spacing-6);
           }
 
           .hero-stats {
