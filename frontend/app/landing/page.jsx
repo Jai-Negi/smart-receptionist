@@ -3,15 +3,63 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+// SVG Icons
+const Icons = {
+  upload: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M20 8v16M14 14l6-6 6 6M8 28h24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  brain: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M12 16c-1.5 1-2 3-2 5s.5 4 2 5M28 16c1.5 1 2 3 2 5s-.5 4-2 5M20 10v20M14 20h12M16 12c0-1.5 1-2.5 2-2.5s2 1 2 2.5M16 28c0 1.5 1 2.5 2 2.5s2-1 2-2.5M22 12c0-1.5 1-2.5 2-2.5s2 1 2 2.5M22 28c0 1.5 1 2.5 2 2.5s2-1 2-2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  send: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M8 22l24-12-24-12v9l16 3-16 3v9Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  lock: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect x="10" y="18" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M14 18V14c0-3.3 2.7-6 6-6s6 2.7 6 6v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="20" cy="25" r="1.5" fill="currentColor"/>
+    </svg>
+  ),
+  lightning: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M22 6l-8 14h8l-4 14 12-20h-8l4-8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  target: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="14" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="20" cy="20" r="10" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="20" cy="20" r="6" stroke="currentColor" strokeWidth="1.5"/>
+      <circle cx="20" cy="20" r="2" fill="currentColor"/>
+    </svg>
+  ),
+  chart: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect x="8" y="20" width="4" height="14" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="16" y="14" width="4" height="20" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+      <rect x="24" y="8" width="4" height="26" rx="1" stroke="currentColor" strokeWidth="1.5"/>
+    </svg>
+  ),
+  code: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M12 14l-4 6 4 6M28 14l4 6-4 6M22 10l-4 20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+  dollar: (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M20 10v20M16 14c0-2 1.5-3 4-3s4 1 4 3-1 2-2 2h-4c-1 0-2 1-2 2s1 2 2 2h4c1 0 2 1 2 3s-1.5 3-4 3-4-1-4-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  ),
+};
+
 export default function Landing() {
-  const [scrollY, setScrollY] = useState(0);
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <main className="landing">
       <a href="#main-content" className="skip-link">
@@ -60,21 +108,6 @@ export default function Landing() {
               See How It Works
             </Link>
           </div>
-
-          <div className="hero-stats">
-            <div className="stat">
-              <div className="stat-value">1000+</div>
-              <div className="stat-label">Companies</div>
-            </div>
-            <div className="stat">
-              <div className="stat-value">99.9%</div>
-              <div className="stat-label">Uptime</div>
-            </div>
-            <div className="stat">
-              <div className="stat-value">24/7</div>
-              <div className="stat-label">Support</div>
-            </div>
-          </div>
         </div>
 
         <div className="hero-visual">
@@ -100,24 +133,21 @@ export default function Landing() {
 
           <div className="steps-grid">
             <div className="step-card">
-              <div className="step-number">1</div>
+              <div className="step-icon-wrapper">{Icons.upload}</div>
               <h3>Upload Your PDF</h3>
               <p>Share your company policies, FAQs, or procedures in a single PDF file</p>
-              <div className="step-icon">📄</div>
             </div>
 
             <div className="step-card">
-              <div className="step-number">2</div>
+              <div className="step-icon-wrapper">{Icons.brain}</div>
               <h3>AI Learns</h3>
               <p>Our AI analyzes your document and learns how to answer questions accurately</p>
-              <div className="step-icon">🧠</div>
             </div>
 
             <div className="step-card">
-              <div className="step-number">3</div>
+              <div className="step-icon-wrapper">{Icons.send}</div>
               <h3>Share & Deploy</h3>
               <p>Get a shareable link or embed code for your website</p>
-              <div className="step-icon">🚀</div>
             </div>
           </div>
         </div>
@@ -131,37 +161,37 @@ export default function Landing() {
 
           <div className="features-grid">
             <div className="feature-card">
-              <div className="feature-icon">🔒</div>
+              <div className="feature-icon-wrapper">{Icons.lock}</div>
               <h3>Enterprise Security</h3>
               <p>Your data is encrypted end-to-end and stored securely with GDPR compliance</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">⚡</div>
+              <div className="feature-icon-wrapper">{Icons.lightning}</div>
               <h3>Lightning Fast</h3>
               <p>Responses in milliseconds. 99.9% uptime guarantee</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">🎯</div>
+              <div className="feature-icon-wrapper">{Icons.target}</div>
               <h3>Accurate Answers</h3>
               <p>AI trained specifically on your documents with confidence scoring</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">📊</div>
+              <div className="feature-icon-wrapper">{Icons.chart}</div>
               <h3>Deep Analytics</h3>
               <p>Track conversations, identify gaps, and improve documentation</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">🔗</div>
+              <div className="feature-icon-wrapper">{Icons.code}</div>
               <h3>Easy Integration</h3>
               <p>Embed on your website with a single line of code or share a link</p>
             </div>
 
             <div className="feature-card">
-              <div className="feature-icon">💰</div>
+              <div className="feature-icon-wrapper">{Icons.dollar}</div>
               <h3>Transparent Pricing</h3>
               <p>Start free. Pay only for what you use. Cancel anytime</p>
             </div>
@@ -183,24 +213,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="footer">
         <div className="section-container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h4>Product</h4>
-              <Link href="#how-it-works">How It Works</Link>
-              <Link href="#features">Features</Link>
-            </div>
-            <div className="footer-section">
-              <h4>Company</h4>
-              <Link href="#">About</Link>
-              <Link href="#">Blog</Link>
-            </div>
-            <div className="footer-section">
-              <h4>Legal</h4>
-              <Link href="#">Privacy</Link>
-              <Link href="#">Terms</Link>
-            </div>
-          </div>
-          <div className="footer-bottom">
+          <div className="footer-center">
             <p>&copy; 2026 SmartReceptionist. All rights reserved.</p>
           </div>
         </div>
@@ -290,7 +303,7 @@ export default function Landing() {
           padding: 8px 16px;
           background: rgba(14, 165, 233, 0.1);
           color: var(--color-primary-600);
-          border: 1px solid rgba(14, 165, 233, 0.2);
+          border: 1px solid var(--color-primary-200);
           border-radius: var(--radius-full);
           font-size: 0.875rem;
           font-weight: 500;
@@ -314,31 +327,7 @@ export default function Landing() {
         .hero-ctas {
           display: flex;
           gap: var(--spacing-4);
-          margin-bottom: var(--spacing-12);
           flex-wrap: wrap;
-        }
-
-        .hero-stats {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--spacing-6);
-          padding-top: var(--spacing-6);
-          border-top: 1px solid var(--color-neutral-200);
-        }
-
-        .stat-value {
-          font-size: 1.5rem;
-          font-weight: 700;
-          background: var(--gradient-primary);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .stat-label {
-          font-size: 0.875rem;
-          color: var(--color-neutral-500);
-          margin-top: var(--spacing-2);
         }
 
         /* Hero Visual */
@@ -352,7 +341,7 @@ export default function Landing() {
           background: white;
           border-radius: var(--radius-lg);
           padding: var(--spacing-6);
-          box-shadow: var(--shadow-md);
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
           width: 100%;
           max-width: 400px;
         }
@@ -405,16 +394,18 @@ export default function Landing() {
         .how-it-works {
           padding: var(--spacing-12) var(--spacing-4);
           background: white;
+          border-top: 1px solid var(--color-neutral-200);
         }
 
         .features {
           padding: var(--spacing-12) var(--spacing-4);
-          background: linear-gradient(180deg, var(--color-primary-50) 0%, white 100%);
+          background: var(--color-neutral-50);
+          border-top: 1px solid var(--color-neutral-200);
         }
 
         .cta-final {
           padding: var(--spacing-12) var(--spacing-4);
-          background: var(--gradient-accent);
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
           color: white;
           text-align: center;
         }
@@ -435,15 +426,12 @@ export default function Landing() {
           text-align: center;
           margin-bottom: var(--spacing-4);
           font-size: 2.5rem;
-          background: var(--gradient-primary);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+          color: var(--color-neutral-900);
         }
 
         .section-subtitle {
           text-align: center;
-          color: var(--color-neutral-500);
+          color: var(--color-neutral-600);
           font-size: 1.125rem;
           margin-bottom: var(--spacing-12);
         }
@@ -457,7 +445,7 @@ export default function Landing() {
 
         .step-card {
           background: white;
-          padding: var(--spacing-6);
+          padding: var(--spacing-8);
           border-radius: var(--radius-lg);
           box-shadow: var(--shadow-sm);
           text-align: center;
@@ -468,26 +456,25 @@ export default function Landing() {
         .step-card:hover {
           transform: translateY(-4px);
           box-shadow: var(--shadow-md);
-          border-color: var(--color-primary-200);
+          border-color: var(--color-primary-300);
         }
 
-        .step-number {
+        .step-icon-wrapper {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          width: 48px;
-          height: 48px;
-          background: var(--gradient-primary);
-          color: white;
-          border-radius: 50%;
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin-bottom: var(--spacing-4);
+          width: 80px;
+          height: 80px;
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(45, 212, 191, 0.1) 100%);
+          color: var(--color-primary-600);
+          border-radius: var(--radius-lg);
+          margin: 0 auto var(--spacing-4);
+          transition: all 0.3s;
         }
 
-        .step-icon {
-          font-size: 3rem;
-          margin-top: var(--spacing-4);
+        .step-card:hover .step-icon-wrapper {
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(45, 212, 191, 0.2) 100%);
+          transform: scale(1.05);
         }
 
         /* Features Grid */
@@ -498,7 +485,7 @@ export default function Landing() {
         }
 
         .feature-card {
-          padding: var(--spacing-6);
+          padding: var(--spacing-8);
           border-radius: var(--radius-lg);
           background: white;
           box-shadow: var(--shadow-sm);
@@ -508,13 +495,26 @@ export default function Landing() {
 
         .feature-card:hover {
           box-shadow: var(--shadow-base);
-          border-color: var(--color-primary-200);
+          border-color: var(--color-primary-300);
           transform: translateY(-2px);
         }
 
-        .feature-icon {
-          font-size: 2.5rem;
+        .feature-icon-wrapper {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 64px;
+          height: 64px;
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(45, 212, 191, 0.1) 100%);
+          color: var(--color-primary-600);
+          border-radius: var(--radius-md);
           margin-bottom: var(--spacing-4);
+          transition: all 0.3s;
+        }
+
+        .feature-card:hover .feature-icon-wrapper {
+          background: linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(45, 212, 191, 0.2) 100%);
+          transform: scale(1.1);
         }
 
         .feature-card h3 {
@@ -539,13 +539,14 @@ export default function Landing() {
         }
 
         .btn-primary {
-          background: var(--gradient-primary);
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
           color: white;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         }
 
         .btn-primary:hover {
           transform: translateY(-2px);
-          box-shadow: 0 12px 24px rgba(14, 165, 233, 0.3);
+          box-shadow: 0 12px 24px rgba(2, 132, 199, 0.4);
         }
 
         .btn-primary-white {
@@ -559,13 +560,13 @@ export default function Landing() {
 
         .btn-secondary {
           background: transparent;
-          color: var(--color-primary-500);
-          border: 2px solid var(--color-primary-500);
+          color: var(--color-primary-600);
+          border: 2px solid var(--color-primary-300);
         }
 
         .btn-secondary:hover {
-          background: rgba(14, 165, 233, 0.05);
-          border-color: var(--color-primary-600);
+          background: var(--color-primary-50);
+          border-color: var(--color-primary-500);
         }
 
         .btn-lg {
@@ -585,36 +586,12 @@ export default function Landing() {
         .footer {
           background: var(--color-neutral-900);
           color: white;
-          padding: var(--spacing-12) var(--spacing-4);
+          padding: var(--spacing-8) var(--spacing-4);
+          border-top: 1px solid var(--color-neutral-800);
         }
 
-        .footer-content {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: var(--spacing-8);
-          margin-bottom: var(--spacing-12);
-        }
-
-        .footer-section h4 {
-          color: white;
-          margin-bottom: var(--spacing-4);
-        }
-
-        .footer-section a {
-          display: block;
-          color: var(--color-neutral-400);
-          margin-bottom: var(--spacing-3);
-          transition: color 0.2s;
-        }
-
-        .footer-section a:hover {
-          color: var(--color-primary-400);
-        }
-
-        .footer-bottom {
+        .footer-center {
           text-align: center;
-          padding-top: var(--spacing-6);
-          border-top: 1px solid var(--color-neutral-700);
           color: var(--color-neutral-400);
         }
 
@@ -637,14 +614,6 @@ export default function Landing() {
 
           .steps-grid,
           .features-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .footer-content {
-            grid-template-columns: 1fr;
-          }
-
-          .hero-stats {
             grid-template-columns: 1fr;
           }
         }
