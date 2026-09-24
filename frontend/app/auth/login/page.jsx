@@ -30,15 +30,14 @@ export default function Login() {
 
   return (
     <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-header">
+      {/* Left Side - Form */}
+      <div className="auth-left">
+        <div className="auth-content">
           <Link href="/landing" className="logo-link">
             <span className="logo-icon">✨</span>
             <span className="logo-text">SmartReceptionist</span>
           </Link>
-        </div>
 
-        <div className="auth-content">
           <h1>Welcome Back</h1>
           <p className="auth-subtitle">Sign in to your account to continue</p>
 
@@ -69,21 +68,42 @@ export default function Login() {
 
             {error && <div className="error-message">{error}</div>}
 
-            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="auth-divider">
-            <span>Don't have an account?</span>
-          </div>
-
-          <Link href="/auth/signup" className="btn btn-secondary btn-full">
-            Create Account
-          </Link>
-
           <div className="auth-footer">
-            <Link href="/landing">Back to Home</Link>
+            <p>
+              Don't have an account?{' '}
+              <Link href="/auth/signup" className="auth-link">
+                Create one
+              </Link>
+            </p>
+            <Link href="/landing" className="back-link">
+              Back to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Side - Visual */}
+      <div className="auth-right">
+        <div className="visual-content">
+          <div className="feature-box">
+            <div className="feature-icon">📄</div>
+            <h3>Upload PDFs</h3>
+            <p>Share your documents and company knowledge</p>
+          </div>
+          <div className="feature-box">
+            <div className="feature-icon">🧠</div>
+            <h3>AI Learns</h3>
+            <p>Our AI analyzes and understands your content</p>
+          </div>
+          <div className="feature-box">
+            <div className="feature-icon">🚀</div>
+            <h3>Deploy Instantly</h3>
+            <p>Get a working chatbot in minutes</p>
           </div>
         </div>
       </div>
@@ -91,25 +111,22 @@ export default function Login() {
       <style jsx>{`
         .auth-page {
           min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: linear-gradient(135deg, #1a1a1e 0%, #252529 100%);
-          padding: var(--spacing-4);
-        }
-
-        .auth-container {
-          width: 100%;
-          max-width: 420px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
           background: white;
-          border-radius: var(--radius-lg);
-          padding: var(--spacing-8);
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
-        .auth-header {
-          margin-bottom: var(--spacing-8);
-          text-align: center;
+        .auth-left {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: var(--spacing-12);
+          background: white;
+        }
+
+        .auth-content {
+          max-width: 420px;
+          width: 100%;
         }
 
         .logo-link {
@@ -118,6 +135,7 @@ export default function Login() {
           gap: var(--spacing-2);
           text-decoration: none;
           color: var(--color-neutral-900);
+          margin-bottom: var(--spacing-8);
           transition: color 0.2s;
         }
 
@@ -172,13 +190,13 @@ export default function Login() {
           font-size: 1rem;
           font-family: var(--font-family);
           transition: all 0.2s;
+          background: white;
         }
 
         .form-group input:focus {
           outline: none;
           border-color: var(--color-primary-500);
           box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
-          background: rgba(2, 132, 199, 0.02);
         }
 
         .form-group input::placeholder {
@@ -215,6 +233,7 @@ export default function Login() {
           background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
           color: white;
           box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+          width: 100%;
         }
 
         .btn-primary:hover:not(:disabled) {
@@ -227,52 +246,105 @@ export default function Login() {
           cursor: not-allowed;
         }
 
-        .btn-secondary {
-          background: transparent;
-          color: var(--color-primary-600);
-          border: 2px solid var(--color-primary-300);
-        }
-
-        .btn-secondary:hover {
-          background: var(--color-primary-50);
-          border-color: var(--color-primary-500);
-        }
-
-        .btn-full {
-          width: 100%;
-        }
-
-        .auth-divider {
-          text-align: center;
-          margin: var(--spacing-6) 0;
-          color: var(--color-neutral-600);
-          font-size: 0.9rem;
-        }
-
         .auth-footer {
-          text-align: center;
           margin-top: var(--spacing-6);
+          text-align: center;
+          font-size: 0.95rem;
+          color: var(--color-neutral-600);
         }
 
-        .auth-footer a {
+        .auth-footer p {
+          margin-bottom: var(--spacing-3);
+        }
+
+        .auth-link {
           color: var(--color-primary-500);
+          font-weight: 600;
           text-decoration: none;
-          font-size: 0.95rem;
-          font-weight: 500;
           transition: color 0.2s;
         }
 
-        .auth-footer a:hover {
+        .auth-link:hover {
           color: var(--color-primary-600);
         }
 
-        @media (max-width: 480px) {
-          .auth-container {
+        .back-link {
+          display: inline-block;
+          color: var(--color-neutral-600);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: color 0.2s;
+        }
+
+        .back-link:hover {
+          color: var(--color-primary-500);
+        }
+
+        /* Right Side */
+        .auth-right {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          padding: var(--spacing-12);
+        }
+
+        .visual-content {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-8);
+          max-width: 380px;
+        }
+
+        .feature-box {
+          background: rgba(255, 255, 255, 0.1);
+          backdrop-filter: blur(10px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: var(--spacing-6);
+          border-radius: var(--radius-lg);
+          text-align: center;
+          color: white;
+          transition: all 0.3s;
+        }
+
+        .feature-box:hover {
+          background: rgba(255, 255, 255, 0.15);
+          transform: translateY(-4px);
+        }
+
+        .feature-icon {
+          font-size: 3rem;
+          margin-bottom: var(--spacing-3);
+        }
+
+        .feature-box h3 {
+          font-size: 1.25rem;
+          margin-bottom: var(--spacing-2);
+          color: white;
+        }
+
+        .feature-box p {
+          color: rgba(255, 255, 255, 0.9);
+          font-size: 0.95rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .auth-page {
+            grid-template-columns: 1fr;
+          }
+
+          .auth-right {
+            display: none;
+          }
+
+          .auth-left {
             padding: var(--spacing-6);
           }
 
-          .auth-content h1 {
-            font-size: 1.5rem;
+          .auth-content {
+            max-width: 100%;
           }
         }
       `}</style>
