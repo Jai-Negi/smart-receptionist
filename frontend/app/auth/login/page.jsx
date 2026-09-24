@@ -15,14 +15,14 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Failed to login. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -31,30 +31,61 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-container">
-        <h1>Login</h1>
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <button type="submit" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        {error && <p className="error">{error}</p>}
-        <p>
-          Don't have an account? <Link href="/auth/signup">Sign up</Link>
-        </p>
+        <div className="auth-header">
+          <Link href="/landing" className="logo-link">
+            <span className="logo-icon">✨</span>
+            <span className="logo-text">SmartReceptionist</span>
+          </Link>
+        </div>
+
+        <div className="auth-content">
+          <h1>Welcome Back</h1>
+          <p className="auth-subtitle">Sign in to your account to continue</p>
+
+          <form onSubmit={handleLogin} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            {error && <div className="error-message">{error}</div>}
+
+            <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="auth-divider">
+            <span>Don't have an account?</span>
+          </div>
+
+          <Link href="/auth/signup" className="btn btn-secondary btn-full">
+            Create Account
+          </Link>
+
+          <div className="auth-footer">
+            <Link href="/landing">Back to Home</Link>
+          </div>
+        </div>
       </div>
 
       <style jsx>{`
@@ -63,78 +94,186 @@ export default function Login() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #f5f5f7 0%, #ffffff 100%);
+          background: linear-gradient(135deg, #1a1a1e 0%, #252529 100%);
+          padding: var(--spacing-4);
         }
 
         .auth-container {
-          background: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
           width: 100%;
-          max-width: 400px;
+          max-width: 420px;
+          background: white;
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-8);
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
-        h1 {
-          margin-bottom: 24px;
+        .auth-header {
+          margin-bottom: var(--spacing-8);
           text-align: center;
         }
 
-        form {
+        .logo-link {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--spacing-2);
+          text-decoration: none;
+          color: var(--color-neutral-900);
+          transition: color 0.2s;
+        }
+
+        .logo-link:hover {
+          color: var(--color-primary-500);
+        }
+
+        .logo-icon {
+          font-size: 1.75rem;
+        }
+
+        .logo-text {
+          font-size: 1.125rem;
+          font-weight: 600;
+        }
+
+        .auth-content h1 {
+          font-size: 2rem;
+          margin-bottom: var(--spacing-2);
+          color: var(--color-neutral-900);
+        }
+
+        .auth-subtitle {
+          color: var(--color-neutral-600);
+          margin-bottom: var(--spacing-6);
+          font-size: 0.95rem;
+        }
+
+        .auth-form {
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          gap: var(--spacing-4);
+          margin-bottom: var(--spacing-6);
         }
 
-        input {
-          padding: 12px 16px;
-          border: 1px solid #d2d2d7;
-          border-radius: 8px;
-          font-size: 1rem;
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-2);
         }
 
-        input:focus {
-          outline: none;
-          border-color: #0071e3;
-          box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
-        }
-
-        button {
-          padding: 12px 16px;
-          background: #0071e3;
-          color: white;
-          border: none;
-          border-radius: 8px;
+        .form-group label {
           font-weight: 600;
+          color: var(--color-neutral-900);
+          font-size: 0.95rem;
+        }
+
+        .form-group input {
+          padding: 12px 16px;
+          border: 1px solid var(--color-neutral-300);
+          border-radius: var(--radius-md);
+          font-size: 1rem;
+          font-family: var(--font-family);
+          transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+          outline: none;
+          border-color: var(--color-primary-500);
+          box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+          background: rgba(2, 132, 199, 0.02);
+        }
+
+        .form-group input::placeholder {
+          color: var(--color-neutral-400);
+        }
+
+        .error-message {
+          padding: var(--spacing-3) var(--spacing-4);
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #c33;
+          border-radius: var(--radius-md);
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-2);
+          padding: 12px 24px;
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.2s;
+          text-decoration: none;
+          border: none;
           cursor: pointer;
+          font-family: var(--font-family);
         }
 
-        button:hover:not(:disabled) {
-          background: #0077ed;
+        .btn-primary {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
         }
 
-        button:disabled {
-          opacity: 0.5;
+        .btn-primary:hover:not(:disabled) {
+          box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.7;
           cursor: not-allowed;
         }
 
-        .error {
-          color: #ff3b30;
+        .btn-secondary {
+          background: transparent;
+          color: var(--color-primary-600);
+          border: 2px solid var(--color-primary-300);
+        }
+
+        .btn-secondary:hover {
+          background: var(--color-primary-50);
+          border-color: var(--color-primary-500);
+        }
+
+        .btn-full {
+          width: 100%;
+        }
+
+        .auth-divider {
+          text-align: center;
+          margin: var(--spacing-6) 0;
+          color: var(--color-neutral-600);
           font-size: 0.9rem;
         }
 
-        p {
+        .auth-footer {
           text-align: center;
-          color: #86868b;
+          margin-top: var(--spacing-6);
         }
 
-        a {
-          color: #0071e3;
+        .auth-footer a {
+          color: var(--color-primary-500);
           text-decoration: none;
+          font-size: 0.95rem;
+          font-weight: 500;
+          transition: color 0.2s;
         }
 
-        a:hover {
-          text-decoration: underline;
+        .auth-footer a:hover {
+          color: var(--color-primary-600);
+        }
+
+        @media (max-width: 480px) {
+          .auth-container {
+            padding: var(--spacing-6);
+          }
+
+          .auth-content h1 {
+            font-size: 1.5rem;
+          }
         }
       `}</style>
     </div>
