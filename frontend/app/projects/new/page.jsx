@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { auth, db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ export default function CreateProject() {
   const [pdfFile, setPdfFile] = useState(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -60,11 +62,10 @@ export default function CreateProject() {
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      // TODO: Upload PDF to Cloud Storage and get URL
-      // For now, save project metadata to Firestore
-      
+      // Step 1: Create project in Firestore (without PDF URL yet)
       const projectsRef = collection(db, 'projects');
       const docRef = await addDoc(projectsRef, {
         userId: user.uid,
@@ -73,16 +74,32 @@ export default function CreateProject() {
         fileName: pdfFile.name,
         fileSize: pdfFile.size,
         createdAt: serverTimestamp(),
-        status: 'processing',
-        pdfUrl: null, // TODO: Will be populated after upload
+        status: 'uploading',
+        pdfUrl: null,
         messages: [],
       });
 
-      // TODO: Upload PDF file to Cloud Storage
-      // Then update document with pdfUrl
+      // Step 2: Upload PDF to Cloud Storage
+      const storage = getStorage();
+      const storageRef = ref(storage, `pdfs/${user.uid}/${docRef.id}/${pdfFile.name}`);
+
+      const snapshot = await uploadBytes(storageRef, pdfFile);
+      
+      // Step 3: Get download URL
+      const pdfUrl = await getDownloadURL(snapshot.ref);
+
+      // Step 4: Update Firestore with PDF URL and change status to processing
+      await updateDoc(doc(db, 'projects', docRef.id), {
+        pdfUrl: pdfUrl,
+        status: 'processing',
+      });
+
+      // TODO: Trigger PDF processing (chunk, embed, store in vector DB)
+      // For now, just redirect
 
       router.push('/dashboard');
     } catch (err) {
+      console.error('Error:', err);
       setError(err.message || 'Failed to create project');
       setIsSubmitting(false);
     }
@@ -129,6 +146,7 @@ export default function CreateProject() {
                   onChange={(e) => setProjectName(e.target.value)}
                   required
                   className="form-input"
+                  disabled={isSubmitting}
                 />
                 <small>This will appear in your project list</small>
               </div>
@@ -143,6 +161,7 @@ export default function CreateProject() {
                   onChange={(e) => setProjectDescription(e.target.value)}
                   rows={3}
                   className="form-textarea"
+                  disabled={isSubmitting}
                 />
                 <small>Help yourself remember what this project is for</small>
               </div>
@@ -158,6 +177,7 @@ export default function CreateProject() {
                     onChange={handleFileChange}
                     className="file-input"
                     required
+                    disabled={isSubmitting}
                   />
                   <div className="file-upload-area">
                     <div className="upload-icon">📄</div>
@@ -187,6 +207,22 @@ export default function CreateProject() {
               {/* Error Message */}
               {error && <div className="error-message">{error}</div>}
 
+              {/* Upload Progress */}
+              {isSubmitting && uploadProgress > 0 && (
+                <div className="progress-container">
+                  <div className="progress-label">
+                    <span>Uploading...</span>
+                    <span className="progress-value">{uploadProgress}%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${uploadProgress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button 
                 type="submit" 
@@ -211,8 +247,9 @@ export default function CreateProject() {
             <div className="info-box">
               <h4>What happens next?</h4>
               <ul>
-                <li>We'll analyze your PDF document</li>
-                <li>Train our AI on your content</li>
+                <li>We'll upload your PDF securely to our servers</li>
+                <li>Extract and analyze the content</li>
+                <li>Train our AI on your document</li>
                 <li>Generate a shareable chatbot link</li>
               </ul>
             </div>
@@ -361,6 +398,12 @@ export default function CreateProject() {
           transition: all 0.2s;
         }
 
+        .form-input:disabled,
+        .form-textarea:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
         .form-input::placeholder,
         .form-textarea::placeholder {
           color: #7a7a82;
@@ -399,6 +442,10 @@ export default function CreateProject() {
           z-index: 10;
         }
 
+        .file-input:disabled {
+          cursor: not-allowed;
+        }
+
         .file-upload-area {
           border: 2px dashed rgba(2, 132, 199, 0.3);
           border-radius: var(--radius-md);
@@ -409,10 +456,15 @@ export default function CreateProject() {
           cursor: pointer;
         }
 
-        .file-input:hover + .file-upload-area,
+        .file-input:hover:not(:disabled) + .file-upload-area,
         .file-input:focus + .file-upload-area {
           border-color: #0284c7;
           background: rgba(2, 132, 199, 0.1);
+        }
+
+        .file-input:disabled + .file-upload-area {
+          opacity: 0.6;
+          cursor: not-allowed;
         }
 
         .upload-icon {
@@ -459,6 +511,39 @@ export default function CreateProject() {
           font-size: 0.85rem;
           color: #7a7a82;
           margin-top: var(--spacing-3);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+          display: flex;
+          flex-direction: column;
+          gap: var(--spacing-2);
+        }
+
+        .progress-label {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.9rem;
+          color: #b0b0b8;
+        }
+
+        .progress-value {
+          font-weight: 600;
+          color: #64d3ff;
+        }
+
+        .progress-bar {
+          width: 100%;
+          height: 6px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-full);
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
+          transition: width 0.3s ease;
         }
 
         /* Buttons */
