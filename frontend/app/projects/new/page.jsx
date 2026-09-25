@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -9,14 +10,16 @@ export default function CreateProject() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
+    const unsubscribe = auth.onAuthStateChanged((authUser) => {
+      if (authUser) {
+        setUser(authUser);
       } else {
         router.push('/auth/login');
       }
@@ -27,10 +30,15 @@ export default function CreateProject() {
   }, [router]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file && file.type === 'application/pdf') {
-      setPdfFile(file);
-      setError('');
+      if (file.size > 10 * 1024 * 1024) {
+        setError('File size must be less than 10MB');
+        setPdfFile(null);
+      } else {
+        setPdfFile(file);
+        setError('');
+      }
     } else {
       setError('Please select a valid PDF file');
       setPdfFile(null);
@@ -51,238 +59,518 @@ export default function CreateProject() {
       return;
     }
 
-    // TODO: Save to Firestore and upload PDF
-    console.log('Project name:', projectName);
-    console.log('PDF file:', pdfFile);
+    setIsSubmitting(true);
+
+    try {
+      // TODO: Upload PDF to Cloud Storage and get URL
+      // For now, save project metadata to Firestore
+      
+      const projectsRef = collection(db, 'projects');
+      const docRef = await addDoc(projectsRef, {
+        userId: user.uid,
+        name: projectName.trim(),
+        description: projectDescription.trim(),
+        fileName: pdfFile.name,
+        fileSize: pdfFile.size,
+        createdAt: serverTimestamp(),
+        status: 'processing',
+        pdfUrl: null, // TODO: Will be populated after upload
+        messages: [],
+      });
+
+      // TODO: Upload PDF file to Cloud Storage
+      // Then update document with pdfUrl
+
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err.message || 'Failed to create project');
+      setIsSubmitting(false);
+    }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div className="spinner"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="create-project-page">
-      <header className="header">
-        <Link href="/dashboard" className="back-link">
-          ← Back to Dashboard
-        </Link>
+      {/* Header */}
+      <header className="page-header">
+        <div className="header-container">
+          <Link href="/dashboard" className="back-link">
+            ← Back to Dashboard
+          </Link>
+          <h1>Create New Project</h1>
+        </div>
       </header>
 
-      <main className="create-project-content">
-        <div className="form-container">
-          <h1>Create New Project</h1>
-          <p className="subtitle">Upload a PDF and create your AI receptionist chatbot</p>
-
-          <form onSubmit={handleSubmit}>
-            {/* Project Name */}
-            <div className="form-group">
-              <label htmlFor="projectName">Project Name</label>
-              <input
-                id="projectName"
-                type="text"
-                placeholder="e.g., Company Support Bot"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                required
-              />
-              <small>Give your chatbot a name</small>
+      {/* Main Content */}
+      <main className="page-content">
+        <div className="content-container">
+          <div className="form-container">
+            <div className="form-header">
+              <h2>Set Up Your AI Receptionist</h2>
+              <p>Upload a PDF and we'll create a chatbot trained on your document</p>
             </div>
 
-            {/* PDF Upload */}
-            <div className="form-group">
-              <label htmlFor="pdfFile">Upload PDF</label>
-              <div className="file-upload-area">
+            <form onSubmit={handleSubmit} className="create-form">
+              {/* Project Name */}
+              <div className="form-group">
+                <label htmlFor="projectName">Project Name</label>
                 <input
-                  id="pdfFile"
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  className="file-input"
+                  id="projectName"
+                  type="text"
+                  placeholder="e.g., Company Support Bot"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  required
+                  className="form-input"
                 />
-                <div className="file-upload-content">
-                  <p className="upload-icon">📄</p>
-                  <p className="upload-text">
-                    {pdfFile ? pdfFile.name : 'Drag and drop your PDF here, or click to select'}
-                  </p>
-                  <small>PDF files only • Max 10MB</small>
+                <small>This will appear in your project list</small>
+              </div>
+
+              {/* Project Description */}
+              <div className="form-group">
+                <label htmlFor="projectDescription">Description (Optional)</label>
+                <textarea
+                  id="projectDescription"
+                  placeholder="Describe what this chatbot will help with..."
+                  value={projectDescription}
+                  onChange={(e) => setProjectDescription(e.target.value)}
+                  rows={3}
+                  className="form-textarea"
+                />
+                <small>Help yourself remember what this project is for</small>
+              </div>
+
+              {/* PDF Upload */}
+              <div className="form-group">
+                <label htmlFor="pdfFile">Upload PDF Document</label>
+                <div className="file-upload-wrapper">
+                  <input
+                    id="pdfFile"
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="file-input"
+                    required
+                  />
+                  <div className="file-upload-area">
+                    <div className="upload-icon">📄</div>
+                    <div className="upload-text">
+                      {pdfFile ? (
+                        <>
+                          <p className="file-name">{pdfFile.name}</p>
+                          <p className="file-size">
+                            {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                          <p className="change-file">Click to change</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="main-text">
+                            Drag and drop your PDF here
+                          </p>
+                          <p className="sub-text">or click to browse</p>
+                          <p className="file-hint">PDF files only • Max 10MB</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Error Message */}
+              {error && <div className="error-message">{error}</div>}
+
+              {/* Submit Button */}
+              <button 
+                type="submit" 
+                className="btn btn-primary btn-lg btn-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="spinner-small"></span>
+                    Creating Project...
+                  </>
+                ) : (
+                  <>
+                    Create Project
+                    <span className="btn-arrow">→</span>
+                  </>
+                )}
+              </button>
+            </form>
+
+            {/* Info Box */}
+            <div className="info-box">
+              <h4>What happens next?</h4>
+              <ul>
+                <li>We'll analyze your PDF document</li>
+                <li>Train our AI on your content</li>
+                <li>Generate a shareable chatbot link</li>
+              </ul>
             </div>
-
-            {/* Error Message */}
-            {error && <p className="error-message">{error}</p>}
-
-            {/* Submit Button */}
-            <button type="submit" className="submit-btn">
-              Create Project
-            </button>
-          </form>
+          </div>
         </div>
       </main>
 
       <style jsx>{`
-        .create-project-page {
+        .loading-page {
           min-height: 100vh;
-          background: #f5f5f7;
-        }
-
-        .loading {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 100vh;
+          background: linear-gradient(180deg, #1a1a1e 0%, #252529 100%);
         }
 
-        .header {
-          padding: 20px 40px;
-          background: white;
-          border-bottom: 1px solid #e5e5e7;
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid rgba(255, 255, 255, 0.1);
+          border-top-color: var(--color-primary-500);
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        .spinner-small {
+          display: inline-block;
+          width: 14px;
+          height: 14px;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-top-color: white;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          margin-right: var(--spacing-2);
+        }
+
+        /* Page Layout */
+        .create-project-page {
+          min-height: 100vh;
+          background: linear-gradient(180deg, #1a1a1e 0%, #252529 100%);
+          color: white;
+        }
+
+        /* Header */
+        .page-header {
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding: var(--spacing-6) 0;
+        }
+
+        .header-container {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 var(--spacing-4);
         }
 
         .back-link {
-          color: #0071e3;
+          display: inline-block;
+          color: #64d3ff;
           text-decoration: none;
           font-weight: 500;
+          font-size: 0.95rem;
+          margin-bottom: var(--spacing-3);
+          transition: color 0.2s;
         }
 
         .back-link:hover {
-          text-decoration: underline;
+          color: #00d4ff;
         }
 
-        .create-project-content {
+        .page-header h1 {
+          font-size: 1.875rem;
+          margin: 0;
+        }
+
+        /* Content */
+        .page-content {
+          padding: var(--spacing-12) 0;
+          min-height: calc(100vh - 100px);
+        }
+
+        .content-container {
           max-width: 600px;
-          margin: 40px auto;
-          padding: 0 20px;
+          margin: 0 auto;
+          padding: 0 var(--spacing-4);
         }
 
         .form-container {
-          background: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-lg);
+          padding: var(--spacing-8);
         }
 
-        h1 {
-          margin-bottom: 8px;
-          font-size: 2rem;
+        .form-header {
+          margin-bottom: var(--spacing-8);
+          text-align: center;
         }
 
-        .subtitle {
-          color: #86868b;
-          margin-bottom: 32px;
+        .form-header h2 {
+          font-size: 1.75rem;
+          margin-bottom: var(--spacing-2);
+        }
+
+        .form-header p {
+          color: #b0b0b8;
           font-size: 1rem;
+          margin: 0;
         }
 
-        form {
+        /* Form */
+        .create-form {
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: var(--spacing-6);
+          margin-bottom: var(--spacing-8);
         }
 
         .form-group {
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: var(--spacing-2);
         }
 
-        label {
+        .form-group label {
           font-weight: 600;
-          color: #1d1d1f;
+          font-size: 0.95rem;
         }
 
-        input[type="text"] {
+        .form-input,
+        .form-textarea {
           padding: 12px 16px;
-          border: 1px solid #d2d2d7;
-          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-md);
+          color: white;
           font-size: 1rem;
-          font-family: inherit;
+          font-family: var(--font-family);
+          transition: all 0.2s;
         }
 
-        input[type="text"]:focus {
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+          color: #7a7a82;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
           outline: none;
-          border-color: #0071e3;
-          box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1);
+          border-color: #0284c7;
+          background: rgba(2, 132, 199, 0.1);
+          box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
         }
 
-        small {
-          color: #86868b;
-          font-size: 0.875rem;
+        .form-textarea {
+          resize: vertical;
+        }
+
+        .form-group small {
+          color: #7a7a82;
+          font-size: 0.85rem;
+        }
+
+        /* File Upload */
+        .file-upload-wrapper {
+          position: relative;
         }
 
         .file-input {
-          display: none;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0;
+          cursor: pointer;
+          z-index: 10;
         }
 
         .file-upload-area {
-          position: relative;
-          border: 2px dashed #d2d2d7;
-          border-radius: 8px;
-          padding: 40px 20px;
+          border: 2px dashed rgba(2, 132, 199, 0.3);
+          border-radius: var(--radius-md);
+          padding: var(--spacing-8);
           text-align: center;
+          background: rgba(2, 132, 199, 0.05);
+          transition: all 0.2s;
           cursor: pointer;
-          transition: border-color 0.2s, background 0.2s;
         }
 
-        .file-upload-area:hover {
-          border-color: #0071e3;
-          background: rgba(0, 113, 227, 0.05);
-        }
-
-        .file-upload-content {
-          pointer-events: none;
+        .file-input:hover + .file-upload-area,
+        .file-input:focus + .file-upload-area {
+          border-color: #0284c7;
+          background: rgba(2, 132, 199, 0.1);
         }
 
         .upload-icon {
-          font-size: 3rem;
-          margin: 0 0 12px;
+          font-size: 2.5rem;
+          margin-bottom: var(--spacing-3);
         }
 
-        .upload-text {
-          font-size: 1rem;
-          color: #1d1d1f;
+        .upload-text p {
           margin: 0;
+          line-height: 1.5;
+        }
+
+        .main-text {
+          font-size: 1rem;
+          font-weight: 600;
+          color: white;
+        }
+
+        .sub-text {
+          font-size: 0.95rem;
+          color: #b0b0b8;
+          margin-top: var(--spacing-2);
+        }
+
+        .file-hint {
+          font-size: 0.85rem;
+          color: #7a7a82;
+          margin-top: var(--spacing-2);
+        }
+
+        .file-name {
+          font-size: 0.95rem;
+          font-weight: 600;
+          color: #64d3ff;
+        }
+
+        .file-size {
+          font-size: 0.85rem;
+          color: #b0b0b8;
+          margin-top: var(--spacing-2);
+        }
+
+        .change-file {
+          font-size: 0.85rem;
+          color: #7a7a82;
+          margin-top: var(--spacing-3);
+        }
+
+        /* Buttons */
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: var(--spacing-2);
+          padding: 12px 24px;
+          border-radius: var(--radius-md);
+          font-weight: 600;
+          font-size: 1rem;
+          transition: all 0.2s;
+          text-decoration: none;
+          border: none;
+          cursor: pointer;
+          font-family: var(--font-family);
+        }
+
+        .btn-primary {
+          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+          color: white;
+          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+          box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
+          transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        .btn-lg {
+          padding: 16px 32px;
+          font-size: 1.125rem;
+        }
+
+        .btn-full {
+          width: 100%;
+        }
+
+        .btn-arrow {
+          transition: transform 0.2s;
+        }
+
+        .btn:hover:not(:disabled) .btn-arrow {
+          transform: translateX(4px);
+        }
+
+        /* Error Message */
+        .error-message {
+          padding: var(--spacing-3) var(--spacing-4);
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #ff7777;
+          border-radius: var(--radius-md);
+          font-size: 0.9rem;
           font-weight: 500;
         }
 
-        .error-message {
-          padding: 12px 16px;
-          background: #fee;
-          border: 1px solid #fcc;
-          color: #c33;
-          border-radius: 8px;
-          font-size: 0.9rem;
-          margin: 0;
+        /* Info Box */
+        .info-box {
+          background: rgba(2, 132, 199, 0.1);
+          border: 1px solid rgba(2, 132, 199, 0.3);
+          border-radius: var(--radius-md);
+          padding: var(--spacing-6);
         }
 
-        .submit-btn {
-          padding: 12px 24px;
-          background: #0071e3;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-weight: 600;
+        .info-box h4 {
           font-size: 1rem;
-          cursor: pointer;
-          transition: background 0.2s;
+          margin: 0 0 var(--spacing-3);
+          color: #64d3ff;
         }
 
-        .submit-btn:hover {
-          background: #0077ed;
+        .info-box ul {
+          margin: 0;
+          padding: 0 0 0 var(--spacing-4);
+          list-style: none;
         }
 
-        .submit-btn:active {
-          transform: scale(0.98);
+        .info-box li {
+          color: #b0b0b8;
+          font-size: 0.95rem;
+          margin-bottom: var(--spacing-2);
         }
 
+        .info-box li:before {
+          content: "✓ ";
+          color: #34c759;
+          font-weight: 700;
+          margin-right: var(--spacing-2);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-          .header {
-            padding: 16px 20px;
+          .page-header h1 {
+            font-size: 1.5rem;
           }
 
           .form-container {
-            padding: 24px;
+            padding: var(--spacing-6);
           }
 
-          h1 {
+          .form-header h2 {
             font-size: 1.5rem;
+          }
+
+          .file-upload-area {
+            padding: var(--spacing-6);
           }
         }
       `}</style>
