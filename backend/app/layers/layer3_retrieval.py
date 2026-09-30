@@ -1,115 +1,93 @@
-"""
-Layer 3: Document Retrieval
-"""
+from app.services.embedding_service import EmbeddingService
+from firebase_admin import firestore
+import logging
 
-from typing import List, Set
-from pydantic import BaseModel
-
-class Document(BaseModel):
-    id: str
-    content: str
-    source: str
-    metadata: dict = {}
-
-class RetrievalResult(BaseModel):
-    found: bool
-    chunks: List[Document] = []
-    similarities: List[float] = []
-    error: str = None
+logger = logging.getLogger(__name__)
+db = firestore.client()
 
 class DocumentRetriever:
-    
-    SIMILARITY_THRESHOLD = 0.1
-    MAX_CHUNKS = 10
-    
-    MOCK_DOCUMENTS = [
-        Document(
-            id="doc_1",
-            content="Vacation Policy: All employees receive 20 days of paid vacation per year. Vacation days are accrued monthly at 1.67 days per month.",
-            source="handbook.md",
-            metadata={"section": "time_off"}
-        ),
-        Document(
-            id="doc_2",
-            content="Sick Leave: Employees are entitled to 10 days of paid sick leave per year.",
-            source="handbook.md",
-            metadata={"section": "time_off"}
-        ),
-        Document(
-            id="doc_3",
-            content="Remote Work Policy: Full-time employees can work remotely up to 2 days per week. Remote work must be pre-approved by manager.",
-            source="handbook.md",
-            metadata={"section": "work_arrangements"}
-        ),
-        Document(
-            id="doc_4",
-            content="Health Insurance: Company provides comprehensive health insurance coverage including medical, dental, and vision.",
-            source="handbook.md",
-            metadata={"section": "benefits"}
-        ),
-    ]
+    """Layer 3: Retrieve relevant documents using semantic search"""
     
     def __init__(self):
-        print("Initializing Document Retriever...")
-        print(f"✓ Loaded {len(self.MOCK_DOCUMENTS)} mock documents")
+        self.embedding_service = EmbeddingService()
     
-    def retrieve(self, query: str, threshold: float = SIMILARITY_THRESHOLD) -> RetrievalResult:
-        """Retrieve relevant documents"""
+    async def retrieve(self, query: str, project_id: str = None) -> list:
+        """Retrieve relevant document chunks"""
         try:
-            query_lower = query.lower()
+            if not query or len(query.strip()) < 3:
+                return []
             
-            similarities = []
-            for doc in self.MOCK_DOCUMENTS:
-                doc_lower = doc.content.lower()
-                # Count how many query words appear in document
-                query_words = query_lower.split()
-                matches = sum(1 for word in query_words if word in doc_lower)
-                similarity = matches / len(query_words) if query_words else 0.0
-                similarities.append((doc, similarity))
+            # Get chunks from Firestore if project_id provided
+            if project_id:
+                chunks = await self._get_project_chunks(project_id)
+            else:
+                # Fallback to mock documents
+                chunks = self._get_mock_chunks()
             
-            # Filter by threshold
-            filtered = [(doc, sim) for doc, sim in similarities if sim >= threshold]
-            filtered.sort(key=lambda x: x[1], reverse=True)
+            if not chunks:
+                logger.warning(f"No chunks found for query: {query}")
+                return []
             
-            if not filtered:
-                return RetrievalResult(
-                    found=False,
-                    error=f"No documents found with similarity >= {threshold}"
-                )
-            
-            chunks = [doc for doc, _ in filtered[:self.MAX_CHUNKS]]
-            sims = [float(sim) for _, sim in filtered[:self.MAX_CHUNKS]]
-            
-            return RetrievalResult(
-                found=True,
-                chunks=chunks,
-                similarities=sims
+            # Semantic search
+            relevant_chunks = self.embedding_service.similarity_search(
+                query, 
+                chunks, 
+                top_k=4
             )
-        
+            
+            results = [
+                {
+                    'content': item['chunk']['content'],
+                    'similarity': item['similarity'],
+                    'chunk_number': item['chunk'].get('chunk_number', -1)
+                }
+                for item in relevant_chunks
+            ]
+            
+            logger.info(f"Retrieved {len(results)} relevant chunks")
+            return results
+            
         except Exception as e:
-            return RetrievalResult(
-                found=False,
-                error=f"Retrieval error: {str(e)}"
-            )
-
-
-if __name__ == "__main__":
-    retriever = DocumentRetriever()
+            logger.error(f"Error in retrieval: {str(e)}")
+            return []
     
-    test_queries = [
-        "What is the vacation policy?",
-        "Can I work from home?",
-        "What about health insurance?",
-    ]
+    async def _get_project_chunks(self, project_id: str) -> list:
+        """Fetch chunks from Firestore"""
+        try:
+            chunks_ref = db.collection('projects').document(project_id).collection('chunks')
+            docs = chunks_ref.stream()
+            
+            chunks = []
+            for doc in docs:
+                chunks.append(doc.to_dict())
+            
+            return chunks
+        except Exception as e:
+            logger.error(f"Error fetching chunks: {str(e)}")
+            return []
     
-    print("\n" + "="*80)
-    for query in test_queries:
-        result = retriever.retrieve(query)
-        print(f"\nQuery: '{query}'")
-        if result.found:
-            print(f"Found {len(result.chunks)} chunks:")
-            for i, (chunk, sim) in enumerate(zip(result.chunks, result.similarities)):
-                print(f"  [{i+1}] Similarity: {sim:.3f} | {chunk.source}")
-                print(f"      {chunk.content[:70]}...")
-        else:
-            print(f"  Error: {result.error}")
+    def _get_mock_chunks(self) -> list:
+        """Fallback mock chunks for testing"""
+        mock_docs = [
+            {
+                'chunk_number': 0,
+                'content': 'Vacation policy: Employees get 20 days of paid vacation per year',
+                'embedding': [0.1] * 384
+            },
+            {
+                'chunk_number': 1,
+                'content': 'Sick leave policy: Employees get 10 days of paid sick leave per year',
+                'embedding': [0.2] * 384
+            },
+            {
+                'chunk_number': 2,
+                'content': 'Remote work policy: Employees can work remotely up to 3 days per week',
+                'embedding': [0.3] * 384
+            },
+            {
+                'chunk_number': 3,
+                'content': 'Health insurance: Company covers 80% of health insurance premiums',
+                'embedding': [0.4] * 384
+            }
+        ]
+        return mock_docs
