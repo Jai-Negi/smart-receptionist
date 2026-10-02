@@ -8,6 +8,8 @@ load_dotenv()
 
 sys.path.append('.')
 from app.routes.chat import router as chat_router
+from app.routes.projects import router as projects_router
+from app.routes.pdf import router as pdf_router
 
 app = FastAPI(
     title="AI Receptionist API",
@@ -24,6 +26,8 @@ app.add_middleware(
 )
 
 app.include_router(chat_router)
+app.include_router(projects_router)
+app.include_router(pdf_router)
 
 @app.get("/health")
 def health():
