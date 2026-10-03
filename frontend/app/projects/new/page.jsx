@@ -6,6 +6,7 @@ import { collection, addDoc, serverTimestamp, updateDoc, doc } from 'firebase/fi
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function CreateProject() {
   const [user, setUser] = useState(null);
@@ -16,7 +17,10 @@ export default function CreateProject() {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [processingStatus, setProcessingStatus] = useState('');
   const router = useRouter();
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
@@ -65,7 +69,9 @@ export default function CreateProject() {
     setUploadProgress(0);
 
     try {
-      // Step 1: Create project in Firestore (without PDF URL yet)
+      setProcessingStatus('Uploading PDF...');
+
+      // Step 1: Create project in Firestore
       const projectsRef = collection(db, 'projects');
       const docRef = await addDoc(projectsRef, {
         userId: user.uid,
@@ -79,29 +85,43 @@ export default function CreateProject() {
         messages: [],
       });
 
+      setProcessingStatus('Uploading to cloud storage...');
+
       // Step 2: Upload PDF to Cloud Storage
       const storage = getStorage();
       const storageRef = ref(storage, `pdfs/${user.uid}/${docRef.id}/${pdfFile.name}`);
-
       const snapshot = await uploadBytes(storageRef, pdfFile);
-      
-      // Step 3: Get download URL
       const pdfUrl = await getDownloadURL(snapshot.ref);
 
-      // Step 4: Update Firestore with PDF URL and change status to processing
+      setProcessingStatus('Updating project...');
+
+      // Step 3: Update Firestore with PDF URL
       await updateDoc(doc(db, 'projects', docRef.id), {
         pdfUrl: pdfUrl,
         status: 'processing',
       });
 
-      // TODO: Trigger PDF processing (chunk, embed, store in vector DB)
-      // For now, just redirect
+      setProcessingStatus('Processing PDF (this may take a minute)...');
 
-      router.push('/dashboard');
+      // Step 4: Trigger backend PDF processing
+      try {
+        await axios.post(
+          `${API_URL}/api/projects/${docRef.id}/trigger-processing`
+        );
+      } catch (processingErr) {
+        console.warn('PDF processing queued in background:', processingErr);
+      }
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        router.push('/dashboard');
+      }, 2000);
+
     } catch (err) {
       console.error('Error:', err);
       setError(err.message || 'Failed to create project');
       setIsSubmitting(false);
+      setProcessingStatus('');
     }
   };
 
@@ -115,7 +135,6 @@ export default function CreateProject() {
 
   return (
     <div className="create-project-page">
-      {/* Header */}
       <header className="page-header">
         <div className="header-container">
           <Link href="/dashboard" className="back-link">
@@ -125,7 +144,6 @@ export default function CreateProject() {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="page-content">
         <div className="content-container">
           <div className="form-container">
@@ -135,7 +153,6 @@ export default function CreateProject() {
             </div>
 
             <form onSubmit={handleSubmit} className="create-form">
-              {/* Project Name */}
               <div className="form-group">
                 <label htmlFor="projectName">Project Name</label>
                 <input
@@ -151,7 +168,6 @@ export default function CreateProject() {
                 <small>This will appear in your project list</small>
               </div>
 
-              {/* Project Description */}
               <div className="form-group">
                 <label htmlFor="projectDescription">Description (Optional)</label>
                 <textarea
@@ -166,7 +182,6 @@ export default function CreateProject() {
                 <small>Help yourself remember what this project is for</small>
               </div>
 
-              {/* PDF Upload */}
               <div className="form-group">
                 <label htmlFor="pdfFile">Upload PDF Document</label>
                 <div className="file-upload-wrapper">
@@ -204,26 +219,15 @@ export default function CreateProject() {
                 </div>
               </div>
 
-              {/* Error Message */}
               {error && <div className="error-message">{error}</div>}
 
-              {/* Upload Progress */}
-              {isSubmitting && uploadProgress > 0 && (
-                <div className="progress-container">
-                  <div className="progress-label">
-                    <span>Uploading...</span>
-                    <span className="progress-value">{uploadProgress}%</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div 
-                      className="progress-fill" 
-                      style={{ width: `${uploadProgress}%` }}
-                    ></div>
-                  </div>
+              {processingStatus && (
+                <div className="processing-status">
+                  <div className="status-spinner"></div>
+                  <p>{processingStatus}</p>
                 </div>
               )}
 
-              {/* Submit Button */}
               <button 
                 type="submit" 
                 className="btn btn-primary btn-lg btn-full"
@@ -243,14 +247,14 @@ export default function CreateProject() {
               </button>
             </form>
 
-            {/* Info Box */}
             <div className="info-box">
               <h4>What happens next?</h4>
               <ul>
-                <li>We'll upload your PDF securely to our servers</li>
-                <li>Extract and analyze the content</li>
-                <li>Train our AI on your document</li>
-                <li>Generate a shareable chatbot link</li>
+                <li>PDF uploads to secure cloud storage</li>
+                <li>Text is extracted and analyzed</li>
+                <li>Content is split into searchable chunks</li>
+                <li>AI embeddings are generated</li>
+                <li>Your chatbot is ready to share!</li>
               </ul>
             </div>
           </div>
@@ -275,12 +279,6 @@ export default function CreateProject() {
           animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
         .spinner-small {
           display: inline-block;
           width: 14px;
@@ -292,14 +290,29 @@ export default function CreateProject() {
           margin-right: var(--spacing-2);
         }
 
-        /* Page Layout */
+        .status-spinner {
+          width: 20px;
+          height: 20px;
+          border: 2px solid rgba(2, 132, 199, 0.2);
+          border-top-color: #64d3ff;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+          display: inline-block;
+          margin-right: var(--spacing-2);
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
         .create-project-page {
           min-height: 100vh;
           background: linear-gradient(180deg, #1a1a1e 0%, #252529 100%);
           color: white;
         }
 
-        /* Header */
         .page-header {
           background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(10px);
@@ -332,7 +345,6 @@ export default function CreateProject() {
           margin: 0;
         }
 
-        /* Content */
         .page-content {
           padding: var(--spacing-12) 0;
           min-height: calc(100vh - 100px);
@@ -367,7 +379,6 @@ export default function CreateProject() {
           margin: 0;
         }
 
-        /* Form */
         .create-form {
           display: flex;
           flex-direction: column;
@@ -426,7 +437,6 @@ export default function CreateProject() {
           font-size: 0.85rem;
         }
 
-        /* File Upload */
         .file-upload-wrapper {
           position: relative;
         }
@@ -513,40 +523,31 @@ export default function CreateProject() {
           margin-top: var(--spacing-3);
         }
 
-        /* Progress Bar */
-        .progress-container {
+        .processing-status {
           display: flex;
-          flex-direction: column;
-          gap: var(--spacing-2);
-        }
-
-        .progress-label {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.9rem;
-          color: #b0b0b8;
-        }
-
-        .progress-value {
-          font-weight: 600;
+          align-items: center;
+          padding: var(--spacing-3) var(--spacing-4);
+          background: rgba(2, 132, 199, 0.1);
+          border: 1px solid rgba(2, 132, 199, 0.3);
+          border-radius: var(--radius-md);
           color: #64d3ff;
+          font-size: 0.9rem;
         }
 
-        .progress-bar {
-          width: 100%;
-          height: 6px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: var(--radius-full);
-          overflow: hidden;
+        .processing-status p {
+          margin: 0;
         }
 
-        .progress-fill {
-          height: 100%;
-          background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
-          transition: width 0.3s ease;
+        .error-message {
+          padding: var(--spacing-3) var(--spacing-4);
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #ff7777;
+          border-radius: var(--radius-md);
+          font-size: 0.9rem;
+          font-weight: 500;
         }
 
-        /* Buttons */
         .btn {
           display: inline-flex;
           align-items: center;
@@ -596,18 +597,6 @@ export default function CreateProject() {
           transform: translateX(4px);
         }
 
-        /* Error Message */
-        .error-message {
-          padding: var(--spacing-3) var(--spacing-4);
-          background: rgba(239, 68, 68, 0.1);
-          border: 1px solid rgba(239, 68, 68, 0.3);
-          color: #ff7777;
-          border-radius: var(--radius-md);
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        /* Info Box */
         .info-box {
           background: rgba(2, 132, 199, 0.1);
           border: 1px solid rgba(2, 132, 199, 0.3);
@@ -640,7 +629,6 @@ export default function CreateProject() {
           margin-right: var(--spacing-2);
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
           .page-header h1 {
             font-size: 1.5rem;
