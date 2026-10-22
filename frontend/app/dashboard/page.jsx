@@ -163,6 +163,12 @@ export default function Dashboard() {
                       >
                         💬 View
                       </Link>
+                      <Link
+                        href={`/projects/${project.id}`}
+                        className="btn btn-secondary"
+                      >
+                        ⚙️ Manage
+                      </Link>
                       <button
                         onClick={() => handleDeleteProject(project.id)}
                         className="btn btn-danger"
