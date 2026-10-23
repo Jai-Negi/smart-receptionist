@@ -3,6 +3,7 @@ Chat Service
 Orchestrates all 5 layers to process user queries end-to-end
 """
 
+import asyncio
 from typing import List, Dict
 from pydantic import BaseModel
 import sys
@@ -41,7 +42,7 @@ class ChatService:
         self.verifier = ResponseVerifier()
         print("✓ All layers initialized")
     
-    def process_chat(self, request: ChatRequest) -> ChatResponse:
+    def process_chat(self, request: ChatRequest, project_id: str = None) -> ChatResponse:
         """
         Process user message through all 5 layers
         
@@ -95,7 +96,7 @@ class ChatService:
         
         # ============ LAYER 3: Document Retrieval ============
         print(f"\n[Layer 3] Retrieving documents...")
-        retrieval_result = self.retriever.retrieve(normalized_text)
+        retrieval_result = self.retriever.retrieve(normalized_text, project_id)
         
         layers_info['layer3_retrieval'] = {
             'found': retrieval_result.found,
@@ -168,6 +169,24 @@ class ChatService:
             hallucination_risk=verification_result.hallucination_risk,
             layers_info=layers_info
         )
+
+
+    async def process_message(self, message: str, chat_history: list = None, project_id: str = None) -> dict:
+        """Async entry point used by the API routes. Runs the blocking pipeline in a thread."""
+        request = ChatRequest(message=message, chat_history=chat_history or [])
+        result = await asyncio.to_thread(self.process_chat, request, project_id)
+
+        if result.success:
+            return {
+                "response": result.response,
+                "confidence": result.confidence or 0.0,
+                "grounded": bool(result.verified),
+            }
+        return {
+            "response": result.error or "Sorry, I couldn't answer that.",
+            "confidence": 0.0,
+            "grounded": False,
+        }
 
 
 if __name__ == "__main__":
