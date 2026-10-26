@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import { authHeaders } from '@/lib/authHeaders';
 
 export default function ShareModal({ projectId, projectName, onClose }) {
   const [copied, setCopied] = useState(false);
@@ -20,7 +21,8 @@ export default function ShareModal({ projectId, projectName, onClose }) {
     try {
       const res = await axios.post(
         `${API_URL}/api/projects/${projectId}/generate-key`,
-        { userId: 'current-user-id' } // TODO: Get from Auth context
+        {},
+        { headers: await authHeaders() }
       );
 
       const chatUrl = `${FRONTEND_URL}/chat/${projectId}`;
