@@ -7,6 +7,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
+import { authHeaders } from '@/lib/authHeaders';
 
 export default function CreateProject() {
   const [user, setUser] = useState(null);
@@ -106,7 +107,9 @@ export default function CreateProject() {
       // Step 4: Trigger backend PDF processing
       try {
         await axios.post(
-          `${API_URL}/api/projects/${docRef.id}/trigger-processing`
+          `${API_URL}/api/projects/${docRef.id}/trigger-processing`,
+          {},
+          { headers: await authHeaders() }
         );
       } catch (processingErr) {
         console.warn('PDF processing queued in background:', processingErr);
