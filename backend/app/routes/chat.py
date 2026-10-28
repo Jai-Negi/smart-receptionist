@@ -102,13 +102,6 @@ async def chat_with_project(project_id: str, request: Request, message: ChatMess
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/api/chat", response_model=ChatResponse)
-async def chat_legacy(message: ChatMessage):
-    """Legacy endpoint with no project. Returns a 'no project selected' reply. Delete once unused."""
-    result = await get_chat_service().process_message(message.message, message.chat_history)
-    return ChatResponse(**result)
-
-
 @router.get("/api/projects/{project_id}/history")
 async def get_chat_history(project_id: str, limit: int = 50, user=Depends(get_current_user)):
     """Chat history for a project (owner only)"""
