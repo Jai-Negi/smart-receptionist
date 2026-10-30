@@ -1,5 +1,3 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import sys
 
@@ -7,6 +5,13 @@ load_dotenv('.env.local')
 load_dotenv()
 
 sys.path.append('.')
+
+# Must run before any module that calls firestore.client() at import time
+from app.firebase_init import init_firebase
+init_firebase()
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.routes.chat import router as chat_router
 from app.routes.projects import router as projects_router
 from app.routes.analytics import router as analytics_router
