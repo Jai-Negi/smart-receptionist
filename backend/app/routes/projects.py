@@ -3,7 +3,6 @@ from firebase_admin import firestore
 from app.services.pdf_queue import PDFQueue
 from app.auth import get_current_user, require_project_owner
 import logging
-import secrets
 
 router = APIRouter()
 db = firestore.client()
@@ -32,20 +31,6 @@ async def get_project(project_id: str):
     except Exception as e:
         logger.error(f"Error getting project: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.post("/api/projects/{project_id}/generate-key")
-async def generate_api_key(project_id: str, user=Depends(get_current_user)):
-    """Generate a new API key (owner only)"""
-    require_project_owner(project_id, user)
-
-    api_key = f"sk_{secrets.token_urlsafe(32)}"
-    db.collection("projects").document(project_id).update({
-        "apiKey": api_key,
-        "apiKeyGeneratedAt": firestore.SERVER_TIMESTAMP,
-    })
-
-    return {"apiKey": api_key, "projectId": project_id}
 
 
 @router.post("/api/projects/{project_id}/trigger-processing")
