@@ -1,468 +1,132 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import axios from 'axios';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 export default function ChatPage() {
-  const params = useParams();
-  const projectId = params.projectId;
-  
+  const { projectId } = useParams();
   const [project, setProject] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [chatLoading, setChatLoading] = useState(false);
-  const [error, setError] = useState('');
-  const messagesEndRef = useRef(null);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const endRef = useRef(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-  // Fetch project metadata
   useEffect(() => {
-    const fetchProject = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/projects/${projectId}`);
-        setProject(res.data);
-        setError('');
-      } catch (err) {
-        setError(err.response?.data?.detail || 'Project not found');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (projectId) {
-      fetchProject();
-    }
+    if (!projectId) return;
+    axios
+      .get(`${API_URL}/api/projects/${projectId}`)
+      .then((res) => setProject(res.data))
+      .catch((err) => setLoadError(err.response?.data?.detail || `Cannot reach backend at ${API_URL}`));
   }, [projectId]);
 
-  // Scroll to bottom
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
+  const send = async (e) => {
     e.preventDefault();
-    
-    if (!input.trim()) return;
+    const text = input.trim();
+    if (!text || sending) return;
 
-    const userMessage = input.trim();
     setInput('');
-    
-    // Add user message to UI
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setChatLoading(true);
+    setSendError('');
+    setMessages((prev) => [...prev, { role: 'user', content: text }]);
+    setSending(true);
 
     try {
-      const res = await axios.post(
-        `${API_URL}/api/chat/${projectId}`,
-        {
-          message: userMessage,
-          chat_history: messages.map(m => ({
-            role: m.role,
-            content: m.content
-          }))
-        }
-      );
-
-      // Add assistant response
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: res.data.response,
-        confidence: res.data.confidence,
-        grounded: res.data.grounded
-      }]);
-      
-      setError('');
+      const res = await axios.post(`${API_URL}/api/chat/${projectId}`, {
+        message: text,
+        chat_history: messages.map(({ role, content }) => ({ role, content })),
+      });
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: res.data.response, confidence: res.data.confidence, grounded: res.data.grounded },
+      ]);
     } catch (err) {
-      const errorMsg = err.response?.data?.detail || err.message;
-      
-      if (err.response?.status === 429) {
-        setError('Too many messages. Please wait a moment.');
-      } else if (err.response?.status === 404) {
-        setError('Project not found.');
-      } else {
-        setError(errorMsg);
-      }
-
-      // Remove last user message on error
-      setMessages(prev => prev.slice(0, -1));
+      setMessages((prev) => prev.slice(0, -1));
+      setInput(text);
+      setSendError(err.response?.data?.detail || 'Something went wrong. Please try again.');
     } finally {
-      setChatLoading(false);
+      setSending(false);
     }
   };
 
-  if (loading) {
+  if (loadError) {
     return (
-      <div className="chat-loading">
-        <div className="spinner"></div>
-        <p>Loading chatbot...</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a1a1e', color: '#ff7777', padding: 24, textAlign: 'center' }}>
+        <div>
+          <h1 style={{ color: 'white' }}>Chatbot unavailable</h1>
+          <p>{loadError}</p>
+        </div>
       </div>
     );
   }
 
-  if (error && !project) {
-    return (
-      <div className="chat-error">
-        <h1>Oops!</h1>
-        <p>{error}</p>
-      </div>
-    );
+  if (!project) {
+    return <div style={{ minHeight: '100vh', background: '#1a1a1e', color: '#b0b0b8', padding: 32 }}>Loading...</div>;
   }
 
   return (
-    <div className="chat-container">
-      {/* Header */}
-      <header className="chat-header">
-        <div className="header-content">
-          <h1>{project?.name || 'AI Assistant'}</h1>
-          {project?.description && (
-            <p className="subtitle">{project.description}</p>
-          )}
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'linear-gradient(180deg, #1a1a1e 0%, #252529 100%)', color: 'white' }}>
+      <header style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <h1 style={{ margin: 0, fontSize: '1.4rem' }}>{project.name}</h1>
+        {project.description && <p style={{ margin: '6px 0 0', color: '#b0b0b8' }}>{project.description}</p>}
       </header>
 
-      {/* Messages */}
-      <div className="messages-container">
-        {messages.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">💬</div>
-            <h2>Start a conversation</h2>
-            <p>Ask anything about {project?.name}</p>
-          </div>
-        ) : (
-          <>
-            {messages.map((msg, idx) => (
-              <div key={idx} className={`message message-${msg.role}`}>
-                <div className="message-content">
-                  {msg.content}
-                  {msg.role === 'assistant' && (
-                    <div className="message-meta">
-                      <span className="confidence">
-                        Confidence: {(msg.confidence * 100).toFixed(0)}%
-                      </span>
-                      {!msg.grounded && (
-                        <span className="warning">⚠️ May contain inaccuracies</span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </>
+      <main style={{ flex: 1, overflowY: 'auto', padding: 16, maxWidth: 900, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+        {messages.length === 0 && (
+          <p style={{ color: '#7a7a82', textAlign: 'center', marginTop: 48 }}>Ask a question about {project.name}</p>
         )}
-      </div>
+        {messages.map((m, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: m.role === 'user' ? 'flex-end' : 'flex-start', marginBottom: 12 }}>
+            <div style={{
+              maxWidth: '75%', padding: '10px 14px', borderRadius: 12, lineHeight: 1.5,
+              background: m.role === 'user' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : 'rgba(255,255,255,0.05)',
+              border: m.role === 'user' ? 'none' : '1px solid rgba(255,255,255,0.1)',
+            }}>
+              {m.content}
+              {m.role === 'assistant' && (
+                <div style={{ marginTop: 6, fontSize: '0.8rem', color: '#64d3ff' }}>
+                  Confidence: {Math.round((m.confidence || 0) * 100)}%
+                  {!m.grounded && <span style={{ color: '#fbbf24' }}> · May be inaccurate</span>}
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+        {sending && <p style={{ color: '#7a7a82' }}>Thinking...</p>}
+        <div ref={endRef} />
+      </main>
 
-      {/* Error */}
-      {error && (
-        <div className="error-banner">
-          {error}
+      {sendError && (
+        <div style={{ background: 'rgba(239,68,68,0.1)', color: '#ff7777', padding: '10px 16px', textAlign: 'center' }}>
+          {sendError}
         </div>
       )}
 
-      {/* Input */}
-      <form onSubmit={handleSendMessage} className="message-form">
-        <div className="input-wrapper">
+      <form onSubmit={send} style={{ padding: 16, borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ display: 'flex', gap: 8, maxWidth: 900, margin: '0 auto' }}>
           <input
-            type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask a question..."
-            disabled={chatLoading}
-            className="message-input"
+            disabled={sending}
+            style={{ flex: 1, padding: '12px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'white', fontSize: '1rem' }}
           />
           <button
             type="submit"
-            disabled={chatLoading || !input.trim()}
-            className="send-button"
+            disabled={sending || !input.trim()}
+            style={{ padding: '0 20px', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none', borderRadius: 8, color: 'white', fontSize: '1.1rem', cursor: 'pointer', opacity: sending || !input.trim() ? 0.6 : 1 }}
           >
-            {chatLoading ? (
-              <span className="spinner-small"></span>
-            ) : (
-              '→'
-            )}
+            →
           </button>
         </div>
       </form>
-
-      <style jsx>{`
-        .chat-container {
-          display: flex;
-          flex-direction: column;
-          height: 100vh;
-          background: linear-gradient(180deg, #1a1a1e 0%, #252529 100%);
-          color: white;
-        }
-
-        .chat-loading,
-        .chat-error {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100vh;
-          background: linear-gradient(180deg, #1a1a1e 0%, #252529 100%);
-          color: white;
-          gap: var(--spacing-4);
-        }
-
-        .chat-error h1 {
-          font-size: 2rem;
-        }
-
-        .chat-error p {
-          color: #b0b0b8;
-          font-size: 1.1rem;
-        }
-
-        .spinner {
-          width: 50px;
-          height: 50px;
-          border: 3px solid rgba(255, 255, 255, 0.1);
-          border-top-color: var(--color-primary-500);
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-
-        .spinner-small {
-          display: inline-block;
-          width: 16px;
-          height: 16px;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          border-top-color: white;
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        /* Header */
-        .chat-header {
-          background: rgba(255, 255, 255, 0.02);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          padding: var(--spacing-6) var(--spacing-4);
-          backdrop-filter: blur(10px);
-        }
-
-        .header-content {
-          max-width: 900px;
-          margin: 0 auto;
-        }
-
-        .chat-header h1 {
-          font-size: 1.5rem;
-          margin: 0;
-        }
-
-        .subtitle {
-          color: #b0b0b8;
-          font-size: 0.95rem;
-          margin: var(--spacing-2) 0 0;
-        }
-
-        /* Messages */
-        .messages-container {
-          flex: 1;
-          overflow-y: auto;
-          padding: var(--spacing-6) var(--spacing-4);
-          max-width: 900px;
-          width: 100%;
-          margin: 0 auto;
-        }
-
-        .empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          height: 100%;
-          text-align: center;
-          color: #7a7a82;
-        }
-
-        .empty-icon {
-          font-size: 4rem;
-          margin-bottom: var(--spacing-4);
-        }
-
-        .empty-state h2 {
-          font-size: 1.5rem;
-          margin: 0 0 var(--spacing-2);
-          color: white;
-        }
-
-        .message {
-          display: flex;
-          margin-bottom: var(--spacing-4);
-          animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .message-user {
-          justify-content: flex-end;
-        }
-
-        .message-assistant {
-          justify-content: flex-start;
-        }
-
-        .message-content {
-          max-width: 70%;
-          padding: var(--spacing-3) var(--spacing-4);
-          border-radius: var(--radius-lg);
-          word-wrap: break-word;
-          line-height: 1.5;
-        }
-
-        .message-user .message-content {
-          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-          color: white;
-        }
-
-        .message-assistant .message-content {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: white;
-        }
-
-        .message-meta {
-          display: flex;
-          gap: var(--spacing-3);
-          margin-top: var(--spacing-2);
-          padding-top: var(--spacing-2);
-          border-top: 1px solid rgba(255, 255, 255, 0.2);
-          font-size: 0.8rem;
-          opacity: 0.8;
-        }
-
-        .confidence {
-          color: #64d3ff;
-        }
-
-        .warning {
-          color: #fbbf24;
-        }
-
-        /* Error Banner */
-        .error-banner {
-          background: rgba(239, 68, 68, 0.1);
-          border-top: 1px solid rgba(239, 68, 68, 0.3);
-          color: #ff7777;
-          padding: var(--spacing-3) var(--spacing-4);
-          text-align: center;
-          font-size: 0.9rem;
-        }
-
-        /* Form */
-        .message-form {
-          padding: var(--spacing-4);
-          background: rgba(255, 255, 255, 0.02);
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .input-wrapper {
-          max-width: 900px;
-          margin: 0 auto;
-          display: flex;
-          gap: var(--spacing-2);
-        }
-
-        .message-input {
-          flex: 1;
-          padding: 12px 16px;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: var(--radius-md);
-          color: white;
-          font-size: 1rem;
-          font-family: var(--font-family);
-          transition: all 0.2s;
-        }
-
-        .message-input::placeholder {
-          color: #7a7a82;
-        }
-
-        .message-input:focus {
-          outline: none;
-          border-color: #0284c7;
-          background: rgba(2, 132, 199, 0.1);
-        }
-
-        .message-input:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        .send-button {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 48px;
-          height: 48px;
-          background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-          border: none;
-          border-radius: var(--radius-md);
-          color: white;
-          font-size: 1.25rem;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-
-        .send-button:hover:not(:disabled) {
-          box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
-          transform: translateY(-2px);
-        }
-
-        .send-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        /* Scrollbar */
-        .messages-container::-webkit-scrollbar {
-          width: 6px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb {
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 3px;
-        }
-
-        .messages-container::-webkit-scrollbar-thumb:hover {
-          background: rgba(255, 255, 255, 0.2);
-        }
-
-        @media (max-width: 768px) {
-          .message-content {
-            max-width: 85%;
-          }
-
-          .chat-header h1 {
-            font-size: 1.25rem;
-          }
-        }
-      `}</style>
     </div>
   );
 }
